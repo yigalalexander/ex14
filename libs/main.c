@@ -17,6 +17,7 @@ int main(int argc, const char * argv[])
     int i;
     for (i=1; i<=250; i++)
         pnum(i*2);
+    printf("Hello, this is another test to pushing changes in GitHub");
     
     return 0;
 }
