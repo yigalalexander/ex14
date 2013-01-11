@@ -16,7 +16,7 @@ int main(int argc, const char * argv[])
     printf("Hello, World!\n");
     int i;
     for (i=1; i<=250; i++)
-        pnum(i);
+        pnum(i*2);
     
     return 0;
 }
