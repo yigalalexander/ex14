@@ -26,12 +26,11 @@ typedef struct {
 	opcode_node * next;
 } opcode_node;
 
-int add();
-int get_opcode_by_index();
-int get_by_addr();
-int delete_by_addr();
-int flush_list();
-int new_opcode_node();
+int add_opcode(opcode_node * list, int address, opcode_bits data, int flag);
+int get_opcode_by_addr(opcode_node * list, int addr);
+int delete_opcode_by_addr(opcode_node * list, int addr);
+int flush_list(opcode_node * list);
+opcode_node * new_opcode_node();
 
 
 #endif /* OPCODE_H_ */
