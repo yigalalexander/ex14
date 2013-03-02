@@ -1,6 +1,6 @@
 /*
  * opcode.c
- *
+ *	Contains the opcode data structure
  *  Created on: Mar 2, 2013
  *      Author: yigalalexander
  */
@@ -14,10 +14,12 @@ typedef struct {
 	unsigned int command:4;
 	unsigned int type:1;
 	unsigned int reserve:3;
-}opcode;
+}opcode_bits;
 
 typedef struct {
-	opcode value;
+	int addr; /*opcode address*/
+	opcode_bits bits; /*bits of information*/
+	int flag; /*type of command*/
 	void * next;
 } opcode_node;
 
