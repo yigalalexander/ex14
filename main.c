@@ -7,7 +7,8 @@
 //
 
 #include <stdio.h>
-#include "util.h"
+#include "util\opcode.h"
+
 
 int main(int argc, const char * argv[])
 {
