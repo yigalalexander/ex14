@@ -27,13 +27,11 @@ typedef struct {
 } opcode_node;
 
 int add();
-int get_by_index();
-int get_by_num();
-int delete_by_num();
-int delete_by_index();
-int delete();
-int free_list();
-int new_node();
+int get_opcode_by_index();
+int get_by_addr();
+int delete_by_addr();
+int flush_list();
+int new_opcode_node();
 
 
 #endif /* OPCODE_H_ */
