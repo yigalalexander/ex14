@@ -17,13 +17,13 @@ typedef struct {
 	unsigned int command:4;
 	unsigned int type:1;
 	unsigned int reserve:3;
-}opcode_bits;
+} opcode_bits;
 
 typedef struct {
 	int addr; /*opcode address*/
 	opcode_bits bits; /*bits of information*/
 	int flag; /*type of command*/
-	void * next;
+	opcode_node * next;
 } opcode_node;
 
 int add();

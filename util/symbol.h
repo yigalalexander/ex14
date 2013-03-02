@@ -11,6 +11,7 @@
 typedef struct {
 	int addr; /*assigned address of the symbol*/
 	char * name; /*symbol name*/
+	symbol_node * next;
 } symbol_node;
 
 #endif /* SYMBOL_H_ */
