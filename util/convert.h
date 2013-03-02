@@ -1,5 +1,6 @@
 /*
  * convert.h
+ *  Contains various conversion functions
  *
  *  Created on: Mar 2, 2013
  *      Author: yigalalexander
