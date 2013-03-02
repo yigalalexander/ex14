@@ -7,7 +7,11 @@
 //
 
 #include <stdio.h>
-#include "util.h"
+#include <stdio.h>
+#include "util\opcode.h"
+#include "util\symbol.h"
+#include "util\convert.h"
+
 
 int main(int argc, const char * argv[])
 {
