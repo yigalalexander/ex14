@@ -19,17 +19,24 @@ typedef struct {
 	unsigned int reserve:3;
 } opcode_bits;
 
-typedef struct {
+typedef struct opn {
 	int addr; /*opcode address*/
 	opcode_bits bits; /*bits of information*/
 	int flag; /*type of command*/
 	opcode_node * next;
 } opcode_node;
 
-int add_opcode(opcode_node * list, int address, opcode_bits data, int flag);
-int get_opcode_by_addr(opcode_node * list, int addr);
-int delete_opcode_by_addr(opcode_node * list, int addr);
-int flush_list(opcode_node * list);
+typedef struct opl {
+	int count;
+	int next_addr;
+	opcode_node * head;
+	opcode_node * tail;
+} opcode_list;
+
+int add_opcode(opcode_list * list, opcode_bits data, int flag);
+int get_opcode_by_addr(opcode_list * list, int addr);
+int delete_opcode_by_addr(opcode_list * list, int addr);
+int flush_list(opcode_list * list);
 opcode_node * new_opcode_node();
 
 

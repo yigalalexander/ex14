@@ -8,6 +8,16 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+int add_opcode(opcode_node * list, int address, opcode_bits data, int flag)
+{
+	/* check pointer is no NULL*/
+		/*cases, if only
+}
+int get_opcode_by_addr(opcode_node * list, int addr);
+int delete_opcode_by_addr(opcode_node * list, int addr);
+int flush_list(opcode_node * list);
+opcode_node * new_opcode_node();
+
 int flush_list(opcode_node * list)
 {
 	if (list!=NULL)
