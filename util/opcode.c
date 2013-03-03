@@ -7,32 +7,79 @@
 
 #include <stdlib.h>
 #include <stdio.h>
+#include "lang.h"
 
-int add_opcode(opcode_node * list, int address, opcode_bits data, int flag)
+int add_opcode(opcode_list * list, opcode_bits data, int flag)
 {
-	/* check pointer is no NULL*/
-		/*cases, if only
-}
-int get_opcode_by_addr(opcode_node * list, int addr);
-int delete_opcode_by_addr(opcode_node * list, int addr);
-int flush_list(opcode_node * list);
-opcode_node * new_opcode_node();
+	opcode_node * temp;
+	int address_ret; /*address that would be returned*/
 
-int flush_list(opcode_node * list)
-{
-	if (list!=NULL)
+	if (list!=NULL && (list->count<(INITIAL_ADDRESS+MAX_OPS))) /* check pointer is no NULL, AND we did not exceed max num of ops*/
 	{
-		/* for each node free it, use a temp pointer to the next*/
-		opcode_node * temp;
-
-		while (list->next!=NULL) /*while we have another node*/
+		temp=new_opcode_node(); /*make new node*/
+		if (IS_EMPTY(list))
 		{
-			temp=list; /*save the pointer for this node
-			list=list->next; /*move one node forward */
-			free(temp); /* free current node */
+			list->head=temp;
+			list->tail=temp;
 		}
-		free(list); /* free the list */
-		return (1); /* finished with success */
-	} else return (0); /* failed */
+		else if (list->head==list->tail) /*single node*/
+		{
+			list->tail->next=temp;
+			list->tail=temp;
+		}
+		else /*more than one node, IS THIS REALLY DIFFERENT FROM THE ABOVE????*/
+		{
+			list->tail->next=temp;
+			list->tail=temp;
+		}
+		temp->addr=list->next_addr; /*set address*/
+		temp->bits=data;
+		temp->flag=flag;
+		address_ret=list->next_addr;
+		list->next_addr++; /* increase next address place */
+		return (address_ret);
+	} else return (0); /*failed to add for some reason*/
 }
+
+opcode_node * get_opcode_by_addr(opcode_list * list, int addr)
+{
+	opcode_node * curr;
+	if (list!=NULL && (addr>=INITIAL_ADDRESS && addr<list->next_addr) && !IS_EMPTY(list)) 	/*not NULL list, addr within permitted range*/
+	{
+		curr=list->head;
+		while (addr!=curr->addr && curr!=NULL)
+			curr=curr->next; /*advance to where the relevant opcode is*/
+		if (curr!=NULL) /*if it not the end of the list*/
+			return (curr);
+		else return (NULL); /*otherwise it was not found*/
+	}
+	else return (NULL); /*failed retrieve*/
+}
+
+int flush_list(opcode_list * list)
+{
+	/* interate through list*/
+	/*free node by node*/
+	/*careful not to free a NULL, use also count variable*/
+	/*free list pointer*/
+}
+
+opcode_node * new_opcode_node()
+{
+	opcode_node * temp;
+	temp=(opcode_node*)malloc(opcode_node);
+	temp->next=NULL;
+	return (temp);
+}
+
+opcode_list * new_opcode_list(int start_addr)
+{
+	opcode_list * temp;
+	temp=(opcode_list*)malloc(opcode_list);
+	temp->count=0;
+	temp->next_addr=start_addr;
+	temp->head=temp->tail=NULL;
+	return (temp);
+}
+
 

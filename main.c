@@ -11,6 +11,7 @@
 #include "util\opcode.h"
 #include "util\symbol.h"
 #include "util\convert.h"
+#include "util\lang.h"
 
 
 int main(int argc, const char * argv[])
@@ -24,6 +25,7 @@ int main(int argc, const char * argv[])
     printf("Hello, this is another test  to pushing changes in GitHub, yet again");
     printf("Remote repository test");
     
-    return 0;
+    return (INITIAL_ADDRESS);
+
 }
 
