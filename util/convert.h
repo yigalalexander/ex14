@@ -11,5 +11,6 @@
 
 char * int2base4 (int num); /*converts an int to 4 base number as a string */
 int bits2int (opcode_bits bit); /*converts the bits field from an opcode to an int*/
+opcode_bits int2bits (int num); /*converts an int to the opcode bits*/
 
 #endif /* CONVERT_H_ */
