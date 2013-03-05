@@ -58,19 +58,20 @@ opcode_node * get_opcode_by_addr(opcode_list * list, int addr)
 
 int flush_list(opcode_list * list)
 {
+	opcode_node * curr, next;
+	int fc; /*free count*/
 	if (list!=NULL)
-{
-opcode_node * curr, next;
-int fc; /*free count*/
-if (!IS_EMPTY(list)) /* not an empty list*/
-{
-curr=list->head;
-next=curr->next;
-while (next
+	{
+	
+		if (!IS_EMPTY(list)) /* not an empty list*/
+		{
+			curr=list->head;
+			next=curr->next;
+			while (next
 
-} 
-free(list);
-} else return (0); /*flush failed, nothing to fail*/
+		} 
+	free(list);
+	} else return (0); /*flush failed, nothing to fail*/
 /* interate through list*/
 	/*free node by node*/
 	/*careful not to free a NULL, use also count variable*/
