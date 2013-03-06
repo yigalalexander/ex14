@@ -10,10 +10,10 @@
 
 #define DUPLICATE_SYMBOL (-1)
 
-typedef struct {
+typedef struct symbol {
 	int addr; /*assigned address of the symbol*/
-	char * name; /*symbol name*/
-	symbol_node * next;
+	char *name; /*symbol name*/
+	struct symbol *next;
 } symbol_node;
 
 int symbol_exists_in (symbol_node * list, char * symbol); /*check if 'symbol' exists in 'list' and returns the address of it, or 0*/

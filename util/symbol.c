@@ -8,8 +8,13 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+typedef struct symbol {
+	int addr; /*assigned address of the symbol*/
+	char *name; /*symbol name*/
+	struct symbol *next;
+} symbol_node;
 
-int flush_symbols(symbol_node * list)
+int flush_symbols(symbol_node *list)
 {
 	if (list!=NULL)
 	{

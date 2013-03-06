@@ -6,3 +6,9 @@
  */
 
 
+#define HELLO 0
+
+int nothing()
+{
+	return (0);
+}

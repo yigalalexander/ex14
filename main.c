@@ -1,25 +1,18 @@
-//
-//  main.c
-//  hello
-//
-//  Created by Yigal Alexander on 10/8/12.
-//  Copyright (c) 2012 Yigal Alexander. All rights reserved.
-//
 
 #include <stdio.h>
 #include <stdio.h>
-#include "util\opcode.h"
-#include "util\symbol.h"
-#include "util\convert.h"
-#include "util\lang.h"
+#include "opcode.h"
+#include "symbol.h"
+#include "convert.h"
+#include "lang.h"
 
 
 int main(int argc, const char * argv[])
 {
 
-    // insert code here...
+	int i;
     printf("Hello, World!\n");
-    int i;
+
     for (i=1; i<=250; i++)
         pnum(i*2);
     printf("Hello, this is another test  to pushing changes in GitHub, yet again");

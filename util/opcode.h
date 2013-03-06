@@ -23,7 +23,7 @@ typedef struct opn {
 	int addr; /*opcode address*/
 	opcode_bits bits; /*bits of information*/
 	int flag; /*type of command*/
-	opcode_node * next;
+	struct opn *next;
 } opcode_node;
 
 typedef struct opl {

@@ -9,7 +9,51 @@
 #include <stdio.h>
 #include "lang.h"
 
-int add_opcode(opcode_list * list, opcode_bits data, int flag)
+typedef struct {
+	unsigned int comb:2;
+	unsigned int dst_reg:3;
+	unsigned int dst_add:2;
+	unsigned int src_reg:3;
+	unsigned int src_add:2;
+	unsigned int command:4;
+	unsigned int type:1;
+	unsigned int reserve:3;
+} opcode_bits;
+
+typedef struct opn {
+	int addr; /*opcode address*/
+	opcode_bits bits; /*bits of information*/
+	int flag; /*type of command*/
+	struct opn *next;
+} opcode_node;
+
+typedef struct opl {
+	int count;
+	int next_addr;
+	opcode_node * head;
+	opcode_node * tail;
+} opcode_list;
+
+opcode_node *new_opcode_node()
+{
+	opcode_node * temp;
+	temp=malloc(sizeof(opcode_node));
+	temp->next=NULL;
+	return (temp);
+}
+
+opcode_list *new_opcode_list(int start_addr)
+{
+	opcode_list * temp;
+	temp=malloc(sizeof(opcode_list));
+	temp->count=0;
+	temp->next_addr=start_addr;
+	temp->head=temp->tail=NULL;
+	return (temp);
+}
+
+
+int add_opcode(opcode_list *list, opcode_bits data, int flag)
 {
 	opcode_node * temp;
 	int address_ret; /*address that would be returned*/
@@ -41,7 +85,7 @@ int add_opcode(opcode_list * list, opcode_bits data, int flag)
 	} else return (0); /*failed to add for some reason*/
 }
 
-opcode_node * get_opcode_by_addr(opcode_list * list, int addr)
+opcode_node *get_opcode_by_addr(opcode_list *list, int addr)
 {
 	opcode_node * curr;
 	if (list!=NULL && (addr>=INITIAL_ADDRESS && addr<list->next_addr) && !IS_EMPTY(list)) 	/*not NULL list, addr within permitted range*/
@@ -56,44 +100,28 @@ opcode_node * get_opcode_by_addr(opcode_list * list, int addr)
 	else return (NULL); /*failed retrieve*/
 }
 
-int flush_list(opcode_list * list)
+int flush_list(opcode_list *list)
 {
-	opcode_node * curr, next;
+	opcode_node *curr, *to_clear;
 	int fc; /*free count*/
 	if (list!=NULL)
 	{
-	
 		if (!IS_EMPTY(list)) /* not an empty list*/
 		{
 			curr=list->head;
-			next=curr->next;
-			while (next
-
+			fc=0;
+			while (curr!=NULL)/* interate through list*/
+			{
+				to_clear=curr;/*free node by node*/
+				curr=curr->next;/*careful not to free a NULL, use also count variable*/
+				free(to_clear);
+				fc++;
+			}
 		} 
-	free(list);
+		free(list);/*free list pointer*/
+		return (1);
 	} else return (0); /*flush failed, nothing to fail*/
-/* interate through list*/
-	/*free node by node*/
-	/*careful not to free a NULL, use also count variable*/
-	/*free list pointer*/
 }
 
-opcode_node * new_opcode_node()
-{
-	opcode_node * temp;
-	temp=(opcode_node*)malloc(opcode_node);
-	temp->next=NULL;
-	return (temp);
-}
-
-opcode_list * new_opcode_list(int start_addr)
-{
-	opcode_list * temp;
-	temp=(opcode_list*)malloc(opcode_list);
-	temp->count=0;
-	temp->next_addr=start_addr;
-	temp->head=temp->tail=NULL;
-	return (temp);
-}
 
 
