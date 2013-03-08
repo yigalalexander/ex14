@@ -33,7 +33,7 @@ typedef struct opl {
 	opcode_node * tail;
 } opcode_list;
 
-#define IS_EMPTY(X) ((X->count==0)?1:0)
+
 
 int add_opcode(opcode_list * list, opcode_bits data, int flag);
 opcode_node * get_opcode_by_addr(opcode_list * list, int addr); /*receives a list, and an address and returns a point to the relevant opcode entry*/

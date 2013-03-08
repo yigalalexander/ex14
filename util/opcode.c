@@ -9,6 +9,8 @@
 #include <stdio.h>
 #include "lang.h"
 
+#define IS_EMPTY(X) ((X->count==0)?1:0)
+
 typedef struct {
 	unsigned int comb:2;
 	unsigned int dst_reg:3;
