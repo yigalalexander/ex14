@@ -7,6 +7,9 @@
 
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
+
+#define IS_EMPTY(X) ((X->count==0)?1:0)
 
 typedef struct symbol {
 	int addr; /*assigned address of the symbol*/
@@ -14,10 +17,26 @@ typedef struct symbol {
 	struct symbol *next;
 } symbol_node;
 
-int symbol_exists_in (symbol_node * list, char * symbol) /*check if 'symbol' exists in 'list' and returns the address of it, or 0*/
+typedef struct sym_list {
+	symbol_node *head;
+	symbol_node *tail;
+	int count;
+} symbol_list;
+
+symbol_list * new_symbol_list()
+{
+	symbol_list *temp;
+	temp=malloc(sizeof(symbol_list));
+	temp->count=0;
+	temp->head=NULL;
+	temp->tail=NULL;
+	return (temp);
+}
+
+int symbol_exists_in (symbol_list * list, char * symbol) /*check if 'symbol' exists in 'list' and returns the address of it, or 0*/
 {
 	symbol_node * curr;
-	curr=list;
+	curr=list->head;
 	while (curr!=NULL)
 		if ((strcmp(symbol,curr->name))==0)
 			return (curr->addr); /*if symbol maches return address*/
@@ -26,40 +45,111 @@ int symbol_exists_in (symbol_node * list, char * symbol) /*check if 'symbol' exi
 	/*made it to NULL pointer return 0*/
 }
 
-int add_symbol (symbol_node * list, char * symbol, int address) /*add a new symbol with a name and an address*/
+int add_symbol (symbol_list * list, char * symbol, int address) /*add a new symbol with a name and an address*/
 {
-	symbol_node *temp;
-	if (list==NULL) /*if its an empty list*/
+	symbol_node *temp,*new;
+	if (list!=NULL && (new=malloc(sizeof(symbol_node)))!=NULL) /*if allocation worked*/
 	{
-		list=malloc(sizeof(symbol_node));
-		list->addr=address;
-		strcpy(list->name,symbol);
-		list->next=NULL;
-	} else /*if we have nodes in it*/
-	{
-		temp=malloc(sizeof(symbol_node));
-		temp->addr=address;
-		strcpy(temp->name,symbol);
-		temp->next=list;
-		list=temp;
+		new->addr=address;
+		strcpy(new->name,symbol);
+		new->next=NULL;
+
+		if (list->head==NULL) /*if its an empty list*/
+		{
+			list->head=new;
+			list->tail=new;
+		} else /*if we have nodes in it*/
+		{
+			temp=list->head;
+			while (temp->next!=NULL)
+				temp=temp->next;/*find the last node*/
+			temp->next=new; /*attach the new node to the last one*/
+			list->tail=new;
+		}
+		list->count++;
 	}
+	return (0);
 }
 
-int flush_symbols(symbol_node *list)
+int delete_symbol_by_name (symbol_list * list, char * name) /* same as above, but by the name */
 {
+	symbol_node *curr,*prev; /*positions*/
+	prev=curr=list->head;
+
+	if (curr!=NULL) /*not an empty list*/
+	{
+
+		while (curr!=NULL) /*did not make it to the end of the list*/
+		{
+			if (strcmp(name,curr->name)==0) /*found the symbol*/
+			{
+				if (curr==list->head)/*if first, check by list*/
+				{
+					list->head=curr->next;
+				} else /*if not first*/
+				{
+					prev->next=curr->next;
+				}
+				free(curr); /*release the node*/
+				list->count--;
+				return (1);
+			}
+			prev=curr;
+			curr=curr->next;
+		}
+	}
+	return (0); /*empty list, nothing to delete*/
+}
+
+int delete_symbol_by_addr (symbol_list * list, int address) /* same as above, but by the name */
+{
+	symbol_node *curr,*prev; /*positions*/
+	prev=curr=list->head;
+
+	if (curr!=NULL) /*not an empty list*/
+	{
+
+		while (curr!=NULL) /*did not make it to the end of the list*/
+		{
+			if (curr->addr==address) /*found the symbol*/
+			{
+				if (curr==list->head)/*if first, check by list*/
+				{
+					list->head=curr->next;
+				} else /*if not first*/
+				{
+					prev->next=curr->next;
+				}
+				free(curr); /*release the node*/
+				list->count--;
+				return (1);
+			}
+			prev=curr;
+			curr=curr->next;
+		}
+	}
+	return (0); /*empty list, nothing to delete*/
+}
+
+int flush_symbols(symbol_list *list)
+{
+	symbol_node *curr, *to_clear;
+	int fc; /*free count*/
 	if (list!=NULL)
 	{
-		/* for each node free it, use a temp pointer to the next*/
-		symbol_node * temp;
-
-		while (list->next!=NULL) /*while we have another node*/
+		if (!IS_EMPTY(list)) /* not an empty list*/
 		{
-			temp=list; /*save the pointer for this node
-			list=list->next; /*move one node forward */
-			free(temp); /* free current node */
+			curr=list->head;
+			fc=0;
+			while (curr!=NULL)/* interate through list*/
+			{
+				to_clear=curr;/*free node by node*/
+				curr=curr->next;/*careful not to free a NULL, use also count variable*/
+				free(to_clear);
+				fc++;
+			}
 		}
-		free(list); /* free the list */
-		return (1); /* finished with success */
-	} else return (0); /* failed */
+		free(list);/*free list pointer*/
+		return (1);
+	} else return (0); /*flush failed, nothing to fail*/
 }
-

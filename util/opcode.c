@@ -63,7 +63,7 @@ int add_opcode(opcode_list *list, opcode_bits data, int flag)
 	if (list!=NULL && (list->count<(INITIAL_ADDRESS+MAX_OPS))) /* check pointer is no NULL, AND we did not exceed max num of ops*/
 	{
 		temp=new_opcode_node(); /*make new node*/
-		if (IS_EMPTY(list))
+		if (IS_EMPTY(list)) /*empty list*/
 		{
 			list->head=temp;
 			list->tail=temp;
