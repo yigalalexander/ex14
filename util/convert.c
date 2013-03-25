@@ -10,10 +10,11 @@
 #include "symbol.h"
 #include <string.h>
 #include <stdlib.h>
-#include <sdtio.h>
+#include <stdio.h>
 #include <string.h>
 
-void ConvertToUpper(char* str)
+void string2upper(char* str)/*Convert a string to all upper characters*/
+
 {
 	int i=0;
 	while(str[i]!='\0')
@@ -43,31 +44,31 @@ int bin2int(char *binArr)
 }
 
 
-char* int2base4(int num)
+char * int2other(int num,int base)
 {
 	int rem, i=0,n=0;
 	char *temp=NULL;
+	char temp_char;
 	while(num)
 	{
-		temp=(char *)realloc(temp,(i+1)*sizeof(char));
-		if((rem=num%4)>9)
+		temp=(char *)realloc(temp,(i+1)*sizeof(char)); /*increase size of string by one char*/
+		if((rem=num%base)>9)
 			temp[i++]='A'+rem-10;
 		else
 			temp[i++]=rem+'0';
-		num=num/4;
+		num=num/base;
 	}
 
 	for(n=0;n<i/2;n++)/*Reverse binary char*/
 	{
-		help=temp[n];
+		temp_char=temp[n];
 		temp[n]=temp[i-n-1];
-		temp[i-n-1]=help;
+		temp[i-n-1]=temp_char;
 	}
-	if(base!=12)
-	{
-		temp=(char *)realloc(temp,((i+1)*sizeof(char)));
-		temp[i]='\0';
-	}
+	temp=(char *)realloc(temp,((i+1)*sizeof(char))); /* Add a terminating char to the string */
+	temp[i]='\0';
 	return temp;
 }
+
+
 
