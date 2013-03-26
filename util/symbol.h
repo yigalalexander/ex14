@@ -10,9 +10,21 @@
 
 #define DUPLICATE_SYMBOL (-1)
 
+typedef enum
+{
+	DATA,CODE
+} symbol_type;
+
+typedef enum
+{
+	ENTRY, EXTERN, LOCAL
+} symbol_location;
+
 typedef struct symbol {
 	int addr; /*assigned address of the symbol*/
 	char *name; /*symbol name*/
+	int dec_value;
+	symbol_location location; /* where does it belong */
 	struct symbol *next;
 } symbol_node;
 
@@ -21,6 +33,8 @@ typedef struct sym_list {
 	symbol_node *tail;
 	int count;
 } symbol_list;
+
+
 
 symbol_list * new_symbol_list();
 int symbol_exists_in (symbol_list * list, char * symbol); /*VV check if 'symbol' exists in 'list' and returns the address of it, or 0*/

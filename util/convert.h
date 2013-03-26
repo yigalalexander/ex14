@@ -11,9 +11,8 @@
 
 char * int2other(int num,int base); /*converts an int to other base number as a string */
 int bits2int (opcode_bits bit); /*converts the bits field from an opcode to an int*/
-int bin2int(char *binArr);
+int bin2int(char *binArr); /*converts a binary string to integer*/
 opcode_bits int2bits (int num); /*converts an int to the opcode bits*/
-void opcode2row (opcode_node opc,char *target); /*converts ^opc^ opcode to a formatted row string*/
 void string2upper(char* str); /*Convert a string to all upper characters*/
 
 #endif /* CONVERT_H_ */

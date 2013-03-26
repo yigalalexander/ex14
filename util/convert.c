@@ -2,7 +2,7 @@
  * convert.c
  *
  *  Created on: Mar 2, 2013
- *      Author: yigalalexander
+ *      Author: Yigal Alexander & Alex Maximov
  */
 
 
@@ -70,5 +70,21 @@ char * int2other(int num,int base)
 	return temp;
 }
 
+int bits2int (opcode_bits bit)
+{
+	int temp;
+	int currbit=0; /*bits position for shifting*/
+
+	temp=temp & (unsigned int)bit.comb; currbit+=2; /*2 bits starting at bit 0 */
+	temp=temp & ((unsigned int)bit.dst_reg >> currbit); currbit+=3; /*3 bits*/
+	temp=temp & ((unsigned int)bit.dst_add >> currbit); currbit+=2; /*2 bits*/
+	temp=temp & ((unsigned int)bit.src_reg >> currbit); currbit+=3; /*3 bits*/
+	temp=temp & ((unsigned int)bit.src_add >> currbit); currbit+=2; /*2 bits*/
+	temp=temp & ((unsigned int)bit.opcode >> currbit); currbit+=4; /*4 bits*/
+	temp=temp & ((unsigned int)bit.type >> currbit); currbit+=1; /*3 bits*/
+	temp=temp & ((unsigned int)bit.reserve >> currbit);
+
+	return(temp);
+}
 
 

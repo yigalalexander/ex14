@@ -9,6 +9,7 @@
 #define PARSE_H_
 
 char * get_first_word (char *);
+int line_pos;
 
 /*
  * Receives an input files to run the first parsing pass over the file
@@ -17,8 +18,11 @@ char * get_first_word (char *);
  * @entries - entry table
  * @externs - extern table
  */
+
 void first_pass(FILE input,opcode_list * target, symbol_list * entries, symbol_list * externs); /*add parameters here!*/
 void second_pass(FILE input,opcode_list * target, symbol_list * entries, symbol_list * externs); /*add parameters here!*/
 void write_opcode_table_to_file(opcode_list * table,FILE main,FILE entries,FILE externs);
+void write_object_file(char *fname, opcode_list * oplist);
+
 
 #endif /* PARSE_H_ */

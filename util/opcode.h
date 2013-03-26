@@ -14,13 +14,15 @@ typedef struct {
 	unsigned int dst_add:2;
 	unsigned int src_reg:3;
 	unsigned int src_add:2;
-	unsigned int command:4;
+	unsigned int opcode:4;
 	unsigned int type:1;
 	unsigned int reserve:3;
 } opcode_bits;
 
 typedef struct opn {
 	int addr; /*opcode address*/
+	char * command; /*command as was read from the file*/
+	char * arguments; /*its arguments*/
 	opcode_bits bits; /*bits of information*/
 	int flag; /*type of command*/
 	struct opn *next;
