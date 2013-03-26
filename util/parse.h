@@ -2,7 +2,9 @@
  * parse.h
  *
  *  Created on: Mar 24, 2013
- *      Author: yigalalexander
+ *      Author: Yigal Alexander & Alex Maximov
+ *
+ *  Code for reading an parsing of assembly code
  */
 
 #ifndef PARSE_H_
@@ -21,8 +23,5 @@ int line_pos;
 
 void first_pass(FILE input,opcode_list * target, symbol_list * entries, symbol_list * externs); /*add parameters here!*/
 void second_pass(FILE input,opcode_list * target, symbol_list * entries, symbol_list * externs); /*add parameters here!*/
-void write_opcode_table_to_file(opcode_list * table,FILE main,FILE entries,FILE externs);
-void write_object_file(char *fname, opcode_list * oplist);
-
 
 #endif /* PARSE_H_ */

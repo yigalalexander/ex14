@@ -24,7 +24,8 @@ typedef struct opn {
 	char * command; /*command as was read from the file*/
 	char * arguments; /*its arguments*/
 	opcode_bits bits; /*bits of information*/
-	int flag; /*type of command*/
+	symbol_location location; /*location of this record*/
+	char mark; /*type of command*/
 	struct opn *next;
 } opcode_node;
 

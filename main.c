@@ -5,6 +5,7 @@
 #include "symbol.h"
 #include "convert.h"
 #include "lang.h"
+#include "parse.h"
 
 
 int main(int argc, const char * argv[])
