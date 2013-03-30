@@ -34,8 +34,6 @@ int read_line(FILE *INPUT_PROGRAM, char *line) {
 		return (0);
 }
 
-
-
 void second_pass(FILE input, opcode_list * target, symbol_list * entries, symbol_list * externs)
 {}
 
@@ -43,7 +41,7 @@ char* is_valid_number(char *string)
 {
 	int i=0,j=0;
 	int temp,sum=0;
-	char *dozenNum;
+	char *fourNum;
 	if(string[i]=='-' || string[i]=='+' )
 	{
 		i++;
@@ -71,31 +69,23 @@ char* is_valid_number(char *string)
 		temp+=1;
  		string=int2other(temp,2,0);
 		temp=strlen(string);
-		dozenNum= (char *)malloc(17*sizeof(char));
+		fourNum= (char *)malloc(17*sizeof(char));
 		for(i=0;i<16;i++)
 		{
 			if(i<(16-temp))
 			{
-				dozenNum[i]='1';
+				fourNum[i]='1';
 			}
 			else
-				dozenNum[i]=string[j++];
+				fourNum[i]=string[j++];
 		}
-		dozenNum[16]='\0';
-		return dozenNum;
+		fourNum[16]='\0';
+		return fourNum;
 	}
 	if(string[0]=='+')
 		return string+1;
 	return string;
 }
-/*==============================
-Function parse a parameter and returns what type of addressing it is(Mieun)
-*@param name = "lbl" - the label to check
-The following parametrs are pointers that will hold the result of the function
-*@param name = "externalLbl" - holds the first label in after the lbl that recived was parsed
-*@param name = "internalLbl1" - holds the second label in after the lbl that recived was parsed (only if exists)
-*@param name = "internalLbl2" - holds the third label in after the lbl that recived was parsed (only if exists)
-================================*/
 
 addr_methods type_of_addressing(char *lbl,char **externalLbl, char **internalLbl1,char **internalLbl2)
 {
@@ -189,7 +179,7 @@ addr_methods type_of_addressing(char *lbl,char **externalLbl, char **internalLbl
 						for(i=0;lbl[j]!='\0' && lbl[j]!=']';i++)
 							temp[i]=lbl[j++];
 						temp[i]='\0';
-						if(lbl[j]=='\0')/*Error no close barket*/
+						if(lbl[j]=='\0')/*unclosed brackets*/
 						{
 						printf(ERR_INVALID_LABEL,line_pos);
 						errors_found++;
@@ -223,12 +213,6 @@ addr_methods type_of_addressing(char *lbl,char **externalLbl, char **internalLbl
 		errors_found =1;
 		return NA;
 }
-/*==============================
-Function gets the global command index the type of addressing and the operand index and checks if it maths and allowed
-*@param name = "cmdIndex" - nzindex of command in global command array
-*@param name = "typeOfAddrMethods" - addressing methoud ("shitat mienu")
-*@param name = "numOper" - can get 1,2 depends on operation type
-================================*/
 
 int addressing_validate_match(int cmdIndex,addr_methods typeAddr,int numOper)
 {
@@ -266,7 +250,7 @@ void validate_addr_add_table(int index, char* lblSource, char * lblDest,int oper
 	int i=0,len,j=0;
 	addr_methods  typeAddr1, typeAddr2;
 	char *exteranlLbl=NULL,*internalLbl1=NULL,*internalLbl2=NULL,*exteranlLbl2=NULL,*internalLbl21=NULL,*internalLbl22=NULL,*machineCode;
-	struct CodeAssemblyTbl *newitem=NULL;
+	opcode_node *newitem=NULL;
 	char *temp;
 
 	if(operationType == 1)/*if its operation type 1(contains label source) -> Analyse label source*/
@@ -364,20 +348,19 @@ void validate_addr_add_table(int index, char* lblSource, char * lblDest,int oper
 		Handleing and creating first operation in AssemblyTbl node
 	  ============================================================*/
 
-	newitem=(struct CodeAssemblyTbl  *)malloc(sizeof(struct CodeAssemblyTbl));
+	newitem=(opcode_node  *)malloc(sizeof(opcode_node));
 	if(newitem==NULL)/*Check if memory error*/
 	{
 		printf(ERR_MEMORY_LOCATION_FAILURE,line_pos);
 		exit(1);
 	}
 
-	newitem->decAddr = IC++;
-	/*Handle the command*/
+	newitem->addr = IC++;
 	if(operationType ==1)
 		temp=(char *)malloc((strlen(methods[index].commandName)+1)*sizeof(char));
 	else
 		temp=(char *)malloc((strlen(methods[index+OPER1_LENGTH].commandName)+1)*sizeof(char));/*for Operation type 2 set the command acoording to index+ operation1 length*/
-	if(!temp)/*for malloc allocation error exit program*/
+	if(!temp) /*for malloc allocation error exit program*/
 	{
 		printf(ERR_MEMORY_LOCATION_FAILURE,line_pos);
 		exit(1);
@@ -390,19 +373,19 @@ void validate_addr_add_table(int index, char* lblSource, char * lblDest,int oper
 		strcpy(temp,methods[(index+OPER1_LENGTH)].commandName);
 	newitem->command=temp;
 	/*end of Handle the command*/
-	newitem->binMachineCode	=machineCode;/*add the bin and dozen Machine Code created above to the node*/
-	newitem->doeznMachineCode = int2other(bin2int(machineCode),12,9);
+	newitem->base2code	=machineCode;/*add the bin Machine Code created above to the node*/
+	newitem->base4code = int2other(bin2int(machineCode),4);
 
-	if(operationType==1)/*Creating the operands symbol in the main node */
+	if(operationType==1)/*Creating the arguments symbol in the main node */
 	{
 		temp=(char *)malloc((strlen(lblSource)+strlen(lblDest)+2)*sizeof(char));
 		strcpy(temp,lblSource);
 		temp[strlen(lblSource)]=',';
 		strcpy(temp+strlen(lblSource)+1,lblDest);
-		newitem->operands=temp;
+		newitem->arguments=temp;
 	}
 	else
-		newitem->operands=lblDest;
+		newitem->arguments=lblDest;
 	newitem->label=first_label;
 	newitem->mark='a';
 	newitem->location=CODE;
@@ -412,7 +395,7 @@ void validate_addr_add_table(int index, char* lblSource, char * lblDest,int oper
 	if(first_label)
 		AddNodeToSymTable(first_label,IC-1,CODE,LOCAL);
 
-	/*Handle additional addressing methods for both operands*/
+	/*Handle additional addressing methods for both arguments*/
 	if(operationType==1)
 		if(typeAddr1!=DIRECT_REG_ADDR)
 		{
@@ -432,55 +415,55 @@ No need to send 3rd label, cause it is for sure a register
 void handle_rest_of_labels(addr_methods type,char * exteranlLbl,char *internalLbl)
 {
 	int i=1,j=0;/*Indicates how many node we have to add to the Main Assembly table*/
-	struct CodeAssemblyTbl *newitem;
+	opcode_node *newitem;
 
 	if(internalLbl!=NULL)
 		i++;
 	for(;j<i;j++)
 	{
-			newitem=(struct CodeAssemblyTbl *)malloc(sizeof(struct CodeAssemblyTbl));
+			newitem=(opcode_node *)malloc(sizeof(opcode_node));
 			if(newitem==NULL)/*Check if memory error*/
 			{
 				printf(ERR_MEMORY_LOCATION_FAILURE,line_pos);
 				exit(1);
 			}
 			newitem->label=NULL;
-			newitem->decAddr=IC++;
+			newitem->addr=IC++;
 			newitem->command=NULL;
 			newitem->mark='r';
-			newitem->operands= NULL;
-			newitem->binMachineCode=exteranlLbl;
+			newitem->arguments= NULL;
+			newitem->base2code=exteranlLbl;
 			if(j==1)
 			{
 				if(type==INDEX_ADDR)/*If its a direct index method(#2)*/
 				{
 					newitem->mark='a';
-					newitem->operands= (char *)malloc(2*sizeof(char));
-					strcpy(newitem->operands,"*");/*This is for iteration 2 - indicates that it is a label that is used as data*/
+					newitem->arguments= (char *)malloc(2*sizeof(char));
+					strcpy(newitem->arguments,"*");/*This is for iteration 2 - indicates that it is a label that is used as data*/
 				}
 			}
 			if( type!=IMMIDATE_ADDR)
 			{
 				if(j==0 )
 				{
-					newitem->binMachineCode = (char *)malloc(strlen(exteranlLbl) * sizeof(char));
-					newitem->binMachineCode =exteranlLbl;
+					newitem->base2code = (char *)malloc(strlen(exteranlLbl) * sizeof(char));
+					newitem->base2code =exteranlLbl;
 				}
 				else
 				{
-					newitem->binMachineCode = (char *)malloc(strlen(internalLbl) * sizeof(char));
-					newitem->binMachineCode =internalLbl;
+					newitem->base2code = (char *)malloc(strlen(internalLbl) * sizeof(char));
+					newitem->base2code =internalLbl;
 				}
 			}
 			if(type!=IMMIDATE_ADDR)/*Handle first methoud(immidate-0)seperatly, meaning no need to enter memeory address after */
 			{
-				newitem->doeznMachineCode= (char *)malloc(2*sizeof(char));
-				strcpy(newitem->doeznMachineCode,"?");
+				newitem->base4code= (char *)malloc(2*sizeof(char));
+				strcpy(newitem->base4code,"?");
 			}
 			else
 			{
 				newitem->mark='a';
-				newitem->doeznMachineCode=NULL;
+				newitem->base4code=NULL;
 			}
 			newitem->location=CODE;
 			newitem->next=NULL;
