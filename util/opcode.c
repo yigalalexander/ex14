@@ -65,36 +65,21 @@ opcode_list *new_opcode_list(int start_addr)
 }
 
 
-int add_opcode(opcode_list *list, opcode_bits data, int flag)
+void add_opcode(opcode_list *list, opcode_node new_item)
 {
-	opcode_node * temp;
-	int address_ret; /*address that would be returned*/
+	opcode_node *temp;
 
-	if (list!=NULL && (list->count<(INITIAL_ADDRESS+MAX_OPS))) /* check pointer is no NULL, AND we did not exceed max num of ops*/
-	{
-		temp=new_opcode_node(); /*make new node*/
-		if (IS_EMPTY(list)) /*empty list*/
+		if(!(list->head)) /*if this is an empty list*/
+			list->head = new_item;
+		else /* not empty, find the last node and add to it */
 		{
-			list->head=temp;
-			list->tail=temp;
+			temp=(list->head);
+			while(temp->next)
+			{
+				temp=temp->next;
+			}
+			temp->next=new_item;
 		}
-		else if (list->head==list->tail) /*single node*/
-		{
-			list->tail->next=temp;
-			list->tail=temp;
-		}
-		else /*more than one node, IS THIS REALLY DIFFERENT FROM THE ABOVE????*/
-		{
-			list->tail->next=temp;
-			list->tail=temp;
-		}
-		temp->addr=list->next_addr; /*set address*/
-		temp->bits=data;
-		temp->flag=flag;
-		address_ret=list->next_addr;
-		list->next_addr++; /* increase next address place */
-		return (address_ret);
-	} else return (0); /*failed to add for some reason*/
 }
 
 opcode_node *get_opcode_by_addr(opcode_list *list, int addr)

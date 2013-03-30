@@ -15,6 +15,7 @@ int line_pos;
 int errors_found;
 int IC;
 char * first_label;
+
 /*
  * Receives an input files to run the first parsing pass over the file
  * @input - input file, must be opened

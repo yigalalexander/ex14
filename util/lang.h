@@ -22,7 +22,7 @@ typedef enum{IMMIDATE_ADDR,
 	INDEX_REG_ADD,
 	DIRECT_REG_ADDR,
 	NA
-} addr_methods; /*addr_methods*/
+} addr_methods; /*addressing methods*/
 
 typedef struct{
 	char commandName[4];
@@ -50,28 +50,28 @@ static command_methods methods[]= /*allowed source and destination methods*/
 		{"STOP",{0,0,0,0,0},{0,0,0,0,0}}
 };
 
-#define ERR_MEMORY_LOCATION_FAILURE "Error: Can't allocate memory - exiting program, occured in line %d \n"
+#define ERR_MEMORY_LOCATION_FAILURE "Error: Cannot allocate memory - exiting program, occured in line %d \n"
 
 /*File errors*/
 #define ERR_FILE_MISSING_OPERAND "Error: No parameters were expected - exiting program \n"
 #define ERR_FAILED_TO_OPEN_FILE "Error: Failed to open file - exiting program \n"
 
 /*Operation errors*/
-#define ERR_MISSING_OPERAND "Error: Interanl error in line %d\n"
-#define ERR_COMMAND_SYNTAX_ERROR "Error: Interanl error in line %d\n"
+#define ERR_MISSING_OPERAND "Error: Internal error in line %d\n"
+#define ERR_COMMAND_SYNTAX_ERROR "Error: Internal error in line %d\n"
 #define ERR_INVALID_COMMAND_NAME "Error: Invalid Command name %d\n"
 #define ERR_EXTRA_OPERAND "Error: There are extra operands  in line %d\n"
 
 /*Addressing errors*/
-#define ERR_INVALID_DIRECT_ADDR "Error: Invalid Direct Addrssing label in line %d\n"
+#define ERR_INVALID_DIRECT_ADDR "Error: Invalid Direct Addressing label in line %d\n"
 #define ERR_INVALID_LABEL "Error:invalid label in line %d\n"
 #define ERR_INVALID_OPERAND_NO_REG "Error: 3rd operand is not a register as expected in line %d\n"
-#define ERR_INVALID_ADDRESSING_METHOD "Error in line  %d: Addressing method is not appropiate for the  command \n"
+#define ERR_INVALID_ADDRESSING_METHOD "Error in line  %d: Addressing method is not appropriate for the  command \n"
 
 /*Instruction errors*/
 #define ERR_INVALID_INSTRUCTION "Error: Missing an instruction after the '.' ,in line %d\n"
 #define ERR_INVALID_DATA_MEMBER "Error: Data instruction contains an invalid number , in line %d"
-#define ERR_MISSING_DATA_MEMBERS "Error: Missing parameters after the data in struction, in line %d"
+#define ERR_MISSING_DATA_MEMBERS "Error: Missing parameters after the data instruction, in line %d"
 #define ERR_INVALID_INSTRUCTION_SYNTAX "Error: A syntax error was found, in line %d"
 
 /*Symbol error*/
