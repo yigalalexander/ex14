@@ -29,9 +29,9 @@ int read_line(FILE *INPUT_PROGRAM, char *line) {
 	line[index] = '\0';
 	line_pos += 1;
 	if (c == EOF) /*anymore lines to read?*/
-		return 1;
+		return (1);
 	else
-		return 0;
+		return (0);
 }
 
 
