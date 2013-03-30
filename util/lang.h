@@ -12,21 +12,25 @@
 #define INITIAL_ADDRESS 100
 #define MAX_OPS 2000
 
+#define OPER1_LENGTH 5
+#define OPER2_LENGTH 9
+#define OPER3_LENGTH 2
+
 typedef enum{IMMIDATE_ADDR,
 	DIRECT_ADDR,
 	INDEX_ADDR,
 	INDEX_REG_ADD,
 	DIRECT_REG_ADDR,
 	NA
-} typesOfAddrMethods;
+} addr_methods; /*addr_methods*/
 
 typedef struct{
 	char commandName[4];
 	int AllowdMethodsSrc[5];
 	int AllowdMethodsDest[5];
-} CommandsMethods;
+} command_methods;
 
-static CommandsMethods methods[]= /*allowed source and destination methods*/
+static command_methods methods[]= /*allowed source and destination methods*/
 {
 		{"MOV",{1,1,1,1,1},{1,1,1,1,1}},
 		{"CMP",{1,1,1,1,1},{1,1,1,1,1}},

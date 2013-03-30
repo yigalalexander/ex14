@@ -8,6 +8,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include "lang.h"
 
 #define IS_EMPTY(X) ((X->count==0)?1:0)
 
@@ -27,6 +28,11 @@ symbol_list * new_symbol_list()
 {
 	symbol_list *temp;
 	temp=malloc(sizeof(symbol_list));
+	if(temp==NULL)/*Check if memory error*/
+	{
+		printf(ERR_MEMORY_LOCATION_FAILURE,line_pos);
+		exit(1);
+	}
 	temp->count=0;
 	temp->head=NULL;
 	temp->tail=NULL;
@@ -67,6 +73,11 @@ int add_symbol (symbol_list * list, char * symbol, int address) /*add a new symb
 			list->tail=new;
 		}
 		list->count++;
+	}
+	else /*allocation failed*/
+	{
+		printf(ERR_MEMORY_LOCATION_FAILURE,line_pos);
+		exit(1);
 	}
 	return (0);
 }
