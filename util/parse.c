@@ -63,13 +63,13 @@ char* is_valid_number(char *string)
 		temp=strlen(string);
 		for(i=1;i<temp;i++)
 			sum=sum*10+(string[i]-'0');
-		string=ConvertDecToOther(sum,2,0);
+		string=int2other(sum,2,0);
 		temp=strlen(string);
 		for(i=0;i<temp;i++)
 			string[i]=((string[i]-'0')^1)+'0';
- 		temp=ConvertBinToDec(string);
+ 		temp=bin2int(string);
 		temp+=1;
- 		string=ConvertDecToOther(temp,2,0);
+ 		string=int2other(temp,2,0);
 		temp=strlen(string);
 		dozenNum= (char *)malloc(17*sizeof(char));
 		for(i=0;i<16;i++)
@@ -300,10 +300,7 @@ void validate_addr_add_table(int index, char* lblSource, char * lblDest,int oper
 			if(addressing_validate_match(index+OPER1_LENGTH,typeAddr2,2)==0)/*Error- Non mathcing allowed addressing method*/
 				return;
 		}
-
 	}
-
-
 
 	/*====================================
 		Store appropiate binary machine code
@@ -321,7 +318,7 @@ void validate_addr_add_table(int index, char* lblSource, char * lblDest,int oper
 	/*0-2 Dest reg*/
 	if(typeAddr2==DIRECT_REG_ADDR)/*Put in value only if register*/
 	{
-		temp=ConvertDecToOther(lblDest[1]-'0',2,0);
+		temp=int2other(lblDest[1]-'0',2,0);
 		len=strlen(temp);
 		for(i=len-1;i>=0;i--)
 			machineCode[i]=temp[j++];
@@ -329,7 +326,7 @@ void validate_addr_add_table(int index, char* lblSource, char * lblDest,int oper
 
 	/*3-5 Method of Dest addressing	*/
 	j=0;
-	temp=ConvertDecToOther(typeAddr2,2,0);
+	temp=int2other(typeAddr2,2,0);
 	len=strlen(temp);
 		for(i=2+len;i>=3;i--)
 			machineCode[i]=temp[j++];
@@ -340,14 +337,14 @@ void validate_addr_add_table(int index, char* lblSource, char * lblDest,int oper
 		if(typeAddr1==DIRECT_REG_ADDR)
 		{
 			j=0;
-			temp=ConvertDecToOther(lblSource[1]-'0',2,0);
+			temp=int2other(lblSource[1]-'0',2,0);
 			len=strlen(temp);
 			for(i=5+len;i>=6;i--)
 				machineCode[i]=temp[j++];
 		}
 		/*9-11 Method of Source addressing*/
 		j=0;
-		temp=ConvertDecToOther(typeAddr1,2,0);
+		temp=int2other(typeAddr1,2,0);
 		len=strlen(temp);
 			for(i=8+len;i>=9;i--)
 				machineCode[i]=temp[j++];
@@ -356,9 +353,9 @@ void validate_addr_add_table(int index, char* lblSource, char * lblDest,int oper
 	/*12-15 Operand Code*/
 	j=0;
 	if(operationType==1)
-		temp=ConvertDecToOther(index,2,0);
+		temp=int2other(index,2,0);
 	else if(operationType==2)
-		temp=ConvertDecToOther(index+OPER1_LENGTH,2,0);
+		temp=int2other(index+OPER1_LENGTH,2,0);
 	len=strlen(temp);
 		for(i=11+len;i>=12;i--)
 			machineCode[i]=temp[j++];
@@ -394,7 +391,7 @@ void validate_addr_add_table(int index, char* lblSource, char * lblDest,int oper
 	newitem->command=temp;
 	/*end of Handle the command*/
 	newitem->binMachineCode	=machineCode;/*add the bin and dozen Machine Code created above to the node*/
-	newitem->doeznMachineCode = ConvertDecToOther(ConvertBinToDec(machineCode),12,9);
+	newitem->doeznMachineCode = int2other(bin2int(machineCode),12,9);
 
 	if(operationType==1)/*Creating the operands symbol in the main node */
 	{
@@ -406,27 +403,27 @@ void validate_addr_add_table(int index, char* lblSource, char * lblDest,int oper
 	}
 	else
 		newitem->operands=lblDest;
-	newitem->label=labelGlobal;
+	newitem->label=first_label;
 	newitem->mark='a';
-	newitem->location=TBL_CODE;
+	newitem->location=CODE;
 	newitem->next = NULL;
 	AddNodeToAssemblyTable(newitem);
 
-	if(labelGlobal)
-		AddNodeToSymTable(labelGlobal,IC-1,TBL_CODE,LOCAL);
+	if(first_label)
+		AddNodeToSymTable(first_label,IC-1,CODE,LOCAL);
 
 	/*Handle additional addressing methods for both operands*/
 	if(operationType==1)
 		if(typeAddr1!=DIRECT_REG_ADDR)
 		{
-			HandleRestOfLabelsInOperation(typeAddr1,exteranlLbl,internalLbl1);
+			handle_rest_of_labels(typeAddr1,exteranlLbl,internalLbl1);
 		}
 	if(typeAddr2!=IMMIDATE_ADDR && typeAddr2!=DIRECT_REG_ADDR)
-		HandleRestOfLabelsInOperation(typeAddr2,exteranlLbl2,internalLbl21);
+		handle_rest_of_labels(typeAddr2,exteranlLbl2,internalLbl21);
 }
 
 /*
-Fuction "HandleRestOfLabelsInOperation"  handles rest of memory allocation in the main Assembly table
+Fuction "handle_rest_of_labels"  handles rest of memory allocation in the main Assembly table
 @param type - gets type of method in order to handle individualy method type 2
 @param exteranlLbl - second label to handle
 @param internalLbl - first label to handle
@@ -485,7 +482,7 @@ void handle_rest_of_labels(addr_methods type,char * exteranlLbl,char *internalLb
 				newitem->mark='a';
 				newitem->doeznMachineCode=NULL;
 			}
-			newitem->location=TBL_CODE;
+			newitem->location=CODE;
 			newitem->next=NULL;
 			AddNodeToAssemblyTable(newitem);
 	}
