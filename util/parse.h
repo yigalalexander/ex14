@@ -12,6 +12,8 @@
 
 char * get_first_word (char *);
 int line_pos;
+int error
+int IC;
 
 /*
  * Receives an input files to run the first parsing pass over the file
@@ -23,5 +25,9 @@ int line_pos;
 
 void first_pass(FILE input,opcode_list * target, symbol_list * entries, symbol_list * externs); /*add parameters here!*/
 void second_pass(FILE input,opcode_list * target, symbol_list * entries, symbol_list * externs); /*add parameters here!*/
+
+char* is_valid_number(char *string);
+typesOfAddrMethods type_of_addressing(char *lbl,char **externalLbl, char **internalLbl1,char **internalLbl2);
+
 
 #endif /* PARSE_H_ */
