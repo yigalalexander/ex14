@@ -12,7 +12,7 @@
 
 char * get_first_word (char *);
 int line_pos;
-int error
+int errors_found;
 int IC;
 
 /*

@@ -40,6 +40,11 @@ opcode_node *new_opcode_node()
 {
 	opcode_node * temp;
 	temp=malloc(sizeof(opcode_node));
+	if(temp==NULL)/*Check if memory error*/
+	{
+		printf(ERR_MEMORY_LOCATION_FAILURE,line_pos);
+		exit(1);
+	}
 	temp->next=NULL;
 	return (temp);
 }
@@ -48,6 +53,11 @@ opcode_list *new_opcode_list(int start_addr)
 {
 	opcode_list * temp;
 	temp=malloc(sizeof(opcode_list));
+	if(temp==NULL)/*Check if memory error*/
+	{
+		printf(ERR_MEMORY_LOCATION_FAILURE,line_pos);
+		exit(1);
+	}
 	temp->count=0;
 	temp->next_addr=start_addr;
 	temp->head=temp->tail=NULL;
