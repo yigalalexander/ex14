@@ -15,10 +15,10 @@ int main(void) {
 
 	symbol_list *new_list;
 	opcode_list *new_op_list;
-	int ErrorFlag = 0;
+	int errors_found = 0;
 	int IC = 100;
 	int DC = 0;
-	int currentLine=0;
+	int addressing_validate_match=0;
 
 	puts("!!!Hello World!!!"); /* prints !!!Hello World!!! */
 	return EXIT_SUCCESS;
