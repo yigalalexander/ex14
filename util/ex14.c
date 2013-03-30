@@ -18,7 +18,7 @@ int main(void) {
 	int errors_found = 0;
 	int IC = 100;
 	int DC = 0;
-	int addressing_validate_match=0;
+	int addressing_validate_match = 0;
 
 	puts("!!!Hello World!!!"); /* prints !!!Hello World!!! */
 	return EXIT_SUCCESS;

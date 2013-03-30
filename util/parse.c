@@ -20,7 +20,7 @@ void first_pass(FILE input, opcode_list * target, symbol_list * entries,
 
 	int i,temp,len;
 	char *label=NULL;
-	char line[100];
+	char line[80];
 	int isEOF=0;
 
 	do
@@ -42,7 +42,7 @@ void first_pass(FILE input, opcode_list * target, symbol_list * entries,
 			if((i+=IsSymbolExist(line+i,&label))==-1)
 			{
 				errors_found+=1;
-				printf(AS_INVALID_SYMBOL,addressing_validate_match);/*Return Symbol*/
+				printf(ERR_INVALID_SYMBOL,addressing_validate_match);
 			}
 			else
 			{
@@ -262,7 +262,7 @@ addr_methods type_of_addressing(char *lbl,char **externalLbl, char **internalLbl
 /*==============================
 Function gets the global command index the type of addressing and the operand index and checks if it maths and allowed
 *@param name = "cmdIndex" - nzindex of command in global command array
-*@param name = "typeOfAddrMethods" - addressing methoud ("shitat mienu")
+*@param name = "typeOfAddrMethods" - addressing method ("shitat mienu")
 *@param name = "numOper" - can get 1,2 depends on operation type
 ================================*/
 
@@ -291,11 +291,11 @@ int addressing_validate_match(int cmdIndex,addr_methods typeAddr,int numOper)
 
 
 /*=====================================================================
-Function checs if the methods match the allowed addressing methoud if yes adds the command to the assembly table to be printed to the object file
+Function checks if the methods match the allowed addressing method if yes adds the command to the assembly table to be printed to the object file
 @param index- commands index in the global command table
 @param lblSource - source label
 @param lblDest- destination label
-@param operationType - indicateds what catogery is this command
+@param operationType - indicates what category is this command
 =====================================================================*/
 void validate_addr_add_table(int index, char* lblSource, char * lblDest,int operationType)
 {
