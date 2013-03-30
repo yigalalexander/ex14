@@ -12,6 +12,14 @@
 #include <stdlib.h>
 
 int main(void) {
+
+	symbol_list *new_list;
+	opcode_list *new_op_list;
+	int ErrorFlag = 0;
+	int IC = 100;
+	int DC = 0;
+	int currentLine=0;
+
 	puts("!!!Hello World!!!"); /* prints !!!Hello World!!! */
 	return EXIT_SUCCESS;
 }
