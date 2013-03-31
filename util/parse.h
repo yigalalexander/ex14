@@ -24,7 +24,7 @@ char * first_label;
  * @externs - extern table
  */
 
-void first_pass(FILE input,opcode_list * target, symbol_list * entries, symbol_list * externs); /*add parameters here!*/
+void first_pass(FILE input,opcode_list * target, symbol_list * entries); /*add parameters here!*/
 void second_pass(FILE input,opcode_list * target, symbol_list * entries, symbol_list * externs); /*add parameters here!*/
 
 char* is_valid_number(char *string);

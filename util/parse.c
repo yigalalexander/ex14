@@ -13,57 +13,52 @@
 #include "convert.h"
 #include "symbol.h"
 
-void first_pass(FILE input, opcode_list * target, symbol_list * entries,
-  	symbol_list * externs) {
-	/* init IC & DC */
+
+
+void first_pass(FILE input, opcode_list * target, symbol_list * entries)
+{
 	/* get line*/
-	/* Is it: A symbol, Psuedo intruction,*/
+	/* Is it: A symbol, Pseudo instruction,*/
 
-	void first_pass(FILE input, opcode_list * target, symbol_list * entries,
-			symbol_list * externs) {
-		/* get line*/
-		/* Is it: A symbol, Pseudo instruction,*/
-
-		int i,temp,len;
-		char *label=NULL;
-		char line[80];
-		int isEOF=0;
-
-		do
-			{
-				label=NULL;
-				isEOF=read_line(input,line);
-				/*is it an empty or a comment line?*/
-				len=strlen(line);
-				for(i=0;i<len && (temp=isspace(line[i])) ; i++);
-				if(i==strlen(line)) /*Empty line*/
-				{
-					continue;
-				}
-				if(line[i]==';') /*Comment line*/
-				{
-					continue;
-				}
-				/*check if the first word is a symbol*/
-				if((i+=IsSymbolExist(line+i,&label))==-1)
-				{
-					errors_found+=1;
-					printf(ERR_INVALID_SYMBOL,addressing_validate_match);
-				}
-				else
-				{
-					while(isspace(temp=line[i++])); /*Skip white-spaces*/
-					i--;
-					if(line[i]=='.')/*Check if contains instruction*/
-						InstructionParse(label,line+i);
-					else
-						OperationParse(label,line+i);
-
-				}
-			}while(!isEOF);
+	int i,temp,len;
+	char *label=NULL;
+	char line[80];
+	int isEOF=0;
+	do
+	{
+		label=NULL;
+		isEOF=read_line(input,line);
+		/*is it an empty or a comment line?*/
+		len=strlen(line);
+		for(i=0;i<len && (temp=isspace(line[i])) ; i++);
+		if(i==strlen(line)) /*Empty line*/
+		{
+			continue;
 		}
-	}
+		if(line[i]==';') /*Comment line*/
+		{
+			continue;
+		}
+		/*check if the first word is a symbol*/
+		if((i+=IsSymbolExist(line+i,&label))==-1)
+		{
+			errors_found+=1;
+			printf(ERR_INVALID_SYMBOL,addressing_validate_match);
+		}
+		else
+		{
+			while(isspace(temp=line[i++])); /*Skip white-spaces*/
+			i--;
+			if(line[i]=='.')/*Check if contains instruction*/
+				InstructionParse(label,line+i);
+			else
+				OperationParse(label,line+i);
+
+		}
+	}while(!isEOF);
 }
+
+
 
 int read_line(FILE *INPUT_PROGRAM, char *line) {
 	char c = '\0';
@@ -283,13 +278,6 @@ int addressing_validate_match(int cmdIndex,addr_methods typeAddr,int numOper)
 }
 
 
-/*=====================================================================
-Function checs if the methods match the allowed addressing methoud if yes adds the command to the assembly table to be printed to the object file
-@param index- commands index in the global command table
-@param lblSource - source label
-@param lblDest- destination label
-@param operationType - indicateds what catogery is this command
-=====================================================================*/
 void validate_addr_add_table(int index, char* lblSource, char * lblDest,int operationType)
 {
 	int i=0,len,j=0;
@@ -331,9 +319,6 @@ void validate_addr_add_table(int index, char* lblSource, char * lblDest,int oper
 		}
 	}
 
-	/*====================================
-		Store appropriate binary machine code
-		====================================*/
 	machineCode=(char *)malloc(17*sizeof(char));
 	if(machineCode==NULL)
 	{
@@ -389,9 +374,6 @@ void validate_addr_add_table(int index, char* lblSource, char * lblDest,int oper
 		for(i=11+len;i>=12;i--)
 			machineCode[i]=temp[j++];
 
-	/*============================================================
-		Handling and creating first operation in AssemblyTbl node
-	  ============================================================*/
 
 	newitem=(opcode_node  *)malloc(sizeof(opcode_node));
 	if(newitem==NULL)/*Check if memory error*/
@@ -450,13 +432,7 @@ void validate_addr_add_table(int index, char* lblSource, char * lblDest,int oper
 		handle_rest_of_labels(typeAddr2,exteranlLbl2,internalLbl21);
 }
 
-/*
-Fuction "handle_rest_of_labels"  handles rest of memory allocation in the main Assembly table
-@param type - gets type of method in order to handle individually method type 2
-@param exteranlLbl - second label to handle
-@param internalLbl - first label to handle
-No need to send 3rd label, cause it is for sure a register
-*/
+
 void handle_rest_of_labels(addr_methods type,char * exteranlLbl,char *internalLbl)
 {
 	int i=1,j=0;/*Indicates how many node we have to add to the Main Assembly table*/
