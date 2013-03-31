@@ -24,6 +24,7 @@ typedef struct symbol {
 	int addr; /*assigned address of the symbol*/
 	char *name; /*symbol name*/
 	int dec_value;
+	char * base4_value;
 	symbol_location location; /* where does it belong */
 	struct symbol *next;
 } symbol_node;

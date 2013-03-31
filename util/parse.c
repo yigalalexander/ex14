@@ -74,8 +74,56 @@ int read_line(FILE *INPUT_PROGRAM, char *line) {
 		return (0);
 }
 
-void second_pass(FILE input, opcode_list * target, symbol_list * entries, symbol_list * externs)
-{}
+void second_pass(opcode_list * opcode_table, symbol_list * symbol_table)
+{
+
+	opcode_node * temp=opcode_table->head;
+	symbol_node *  sym=symbol_table->head;
+	while(temp)
+	{
+		/*temp->=int2other(temp->addr,4); ----- OLD line */
+		if(temp->base4code !=NULL && !(strcmp(temp->base4code,"?")))/*Check if need to update the address*/
+		{
+			if((sym=DoesNodeExist(temp->base2code)))
+			{
+				if(sym->location==EXTERN)/*Enter '0' to Binary machine code*/
+				{
+					temp->base2code= int2other(0,2,0);
+					temp->mark='e';
+					if(sym->dec_value==0)
+						sym->dec_value=temp->decAddr;
+					sym->base4_value = int2other(sym->dec_value,12,4);
+				}
+				else
+				{
+					/*Check if need the the distance label or the address*/
+					if(temp->operands!=NULL && !(strcmp(temp->operands,"*")))/*Indicates that it is "distance label"*/
+					{
+						while(findDestNode && findDestNode->decAddr!=sym->dec_value)
+							findDestNode=findDestNode->next;
+						temp->base2code= findDestNode->base2code;
+					}
+					else
+					{
+						temp->base2code = int2other(sym->dec_value,2,0);
+					}
+
+				}
+			}
+			else
+			{
+				errors_found+=1;
+				printf(ERR_SYMBOL_NOT_EXIST_NAME ,line_pos);
+			}
+		}
+		temp->base4code=int2other(ConvertBinToDec(temp->base2code),12,8);
+		temp=temp->next;
+	}
+}
+
+
+
+
 
 char* is_valid_number(char *string)
 {
@@ -105,9 +153,9 @@ char* is_valid_number(char *string)
 		temp=strlen(string);
 		for(i=0;i<temp;i++)
 			string[i]=((string[i]-'0')^1)+'0';
- 		temp=bin2int(string);
+		temp=bin2int(string);
 		temp+=1;
- 		string=int2other(temp,2,0);
+		string=int2other(temp,2,0);
 		temp=strlen(string);
 		fourNum= (char *)malloc(17*sizeof(char));
 		for(i=0;i<16;i++)
@@ -142,116 +190,116 @@ addr_methods type_of_addressing(char *lbl,char **externalLbl, char **internalLbl
 
 
 	/*Check if direct addresing	*/
-   if(lbl[0]=='#')
-   {
-	   if((*externalLbl=(isValidNumber(lbl+1)))==NULL)
-	   {
-		   return NA;
-	   }
-	   else
-		   return IMMIDATE_ADDR;
-   }
+	if(lbl[0]=='#')
+	{
+		if((*externalLbl=(isValidNumber(lbl+1)))==NULL)
+		{
+			return NA;
+		}
+		else
+			return IMMIDATE_ADDR;
+	}
 
-  *externalLbl=NULL;
+	*externalLbl=NULL;
 
-  for(i=0;lbl[i]!='\0' && lbl[i]!='[';i++) /*is it 1,2 or 3? */
-	  temp[i]=lbl[i];
-  temp[i]='\0';
-  j=IsValidLabel(temp,externalLbl);
-   if(externalLbl==NULL)
-   {
-        printf(ERR_INVALID_LABEL,line_pos);
+	for(i=0;lbl[i]!='\0' && lbl[i]!='[';i++) /*is it 1,2 or 3? */
+		temp[i]=lbl[i];
+	temp[i]='\0';
+	j=IsValidLabel(temp,externalLbl);
+	if(externalLbl==NULL)
+	{
+		printf(ERR_INVALID_LABEL,line_pos);
 		errors_found +=1;
 		return NA;
-   }
-      if(lbl[j]=='\0')/*Found label*/
-	   {
-		   return DIRECT_ADDR;
-	   }
+	}
+	if(lbl[j]=='\0')/*Found label*/
+	{
+		return DIRECT_ADDR;
+	}
 
-	   if(lbl[j++]=='[')/*Check if 2/3*/
-	   {
-			    for(i=0;lbl[j]!='\0' && lbl[j]!=']';i++)
-					  temp[i]=lbl[j++];
-				 temp[i]='\0';
-				 if(lbl[j]=='\0')/*Error no close barket*/
-				 {
-					printf(ERR_INVALID_LABEL,line_pos);
-					errors_found++;
-					return NA;
-				 }
-				if(temp[0]=='*')/*if Offset method*/
+	if(lbl[j++]=='[')/*Check if 2/3*/
+	{
+		for(i=0;lbl[j]!='\0' && lbl[j]!=']';i++)
+			temp[i]=lbl[j++];
+		temp[i]='\0';
+		if(lbl[j]=='\0')/*Error no close barket*/
+		{
+			printf(ERR_INVALID_LABEL,line_pos);
+			errors_found++;
+			return NA;
+		}
+		if(temp[0]=='*')/*if Offset method*/
+		{
+			if(IsValidLabel(temp+1,internalLbl1)==-1)
+			{
+				printf(ERR_INVALID_LABEL,line_pos);
+				errors_found++;
+				return NA;
+			}
+		}
+		else
+		{
+			if(IsValidLabel(temp,internalLbl1)==-1)
+			{
+				printf(ERR_INVALID_LABEL,line_pos);
+				errors_found++;
+				return NA;
+			}
+		}
+		if(lbl[j]==']') /*Checking if other ] exists*/
+		{
+			j++;
+			if(temp[0]=='*' )/*Check if method #2*/
+			{
+				if(lbl[j]=='\0')
 				{
-					if(IsValidLabel(temp+1,internalLbl1)==-1)
-					{
-					printf(ERR_INVALID_LABEL,line_pos);
-					errors_found++;
-					return NA;
-					}
+					return INDEX_ADDR;
 				}
 				else
 				{
-					if(IsValidLabel(temp,internalLbl1)==-1)
-					{
-						printf(ERR_INVALID_LABEL,line_pos);
-						errors_found++;
-						return NA;
-					}
+					printf(ERR_INVALID_LABEL,line_pos);
+					errors_found =+1;
+					return NA;
 				}
-				if(lbl[j]==']') /*Checking if other ] exists*/
+			}
+			if(lbl[j++]=='[')/*Check if 3 METHOUD*/
+			{
+				for(i=0;lbl[j]!='\0' && lbl[j]!=']';i++)
+					temp[i]=lbl[j++];
+				temp[i]='\0';
+				if(lbl[j]=='\0')/*unclosed brackets*/
 				{
-					j++;
-					if(temp[0]=='*' )/*Check if method #2*/
-					{
-						if(lbl[j]=='\0')
-						{
-							return INDEX_ADDR;
-						}
-						else
-						{
-							printf(ERR_INVALID_LABEL,line_pos);
-							errors_found =+1;
-							return NA;
-						}
-					}
-					if(lbl[j++]=='[')/*Check if 3 METHOUD*/
-					{
-						for(i=0;lbl[j]!='\0' && lbl[j]!=']';i++)
-							temp[i]=lbl[j++];
-						temp[i]='\0';
-						if(lbl[j]=='\0')/*unclosed brackets*/
-						{
-						printf(ERR_INVALID_LABEL,line_pos);
-						errors_found++;
-						return NA;
-						}
-						/*=================
+					printf(ERR_INVALID_LABEL,line_pos);
+					errors_found++;
+					return NA;
+				}
+				/*=================
 						  Check if register
 						  =================*/
 
-						if(strlen(temp) == 2 )
-						{
-							if(temp[0] != 'r'  || temp[1]<'0' || temp[1]>'7')/*check if fregistar*/
-							{
-								printf(ERR_INVALID_LABEL,line_pos);
-								errors_found++;
-								return NA;
-							}
-							else/*all is good*/
-							{
-								return INDEX_REG_ADD;
-							}
-						}
+				if(strlen(temp) == 2 )
+				{
+					if(temp[0] != 'r'  || temp[1]<'0' || temp[1]>'7')/*check if fregistar*/
+					{
+						printf(ERR_INVALID_LABEL,line_pos);
+						errors_found++;
+						return NA;
+					}
+					else/*all is good*/
+					{
+						return INDEX_REG_ADD;
 					}
 				}
-					/*error third operand is not a register*/
-					printf(ERR_INVALID_OPERAND_NO_REG,line_pos);
-					errors_found =+1;
-					return NA;
-	   }
+			}
+		}
+		/*error third operand is not a register*/
 		printf(ERR_INVALID_OPERAND_NO_REG,line_pos);
-		errors_found =1;
+		errors_found =+1;
 		return NA;
+	}
+	printf(ERR_INVALID_OPERAND_NO_REG,line_pos);
+	errors_found =1;
+	return NA;
 }
 
 int addressing_validate_match(int cmdIndex,addr_methods typeAddr,int numOper)
@@ -269,14 +317,13 @@ int addressing_validate_match(int cmdIndex,addr_methods typeAddr,int numOper)
 	{
 		if(methods[cmdIndex].AllowdMethodsDest[typeAddr]==0)
 		{
-		errors_found+=1;
-		printf(ERR_INVALID_ADDRESSING_METHOD, line_pos);
-		return 0;
+			errors_found+=1;
+			printf(ERR_INVALID_ADDRESSING_METHOD, line_pos);
+			return 0;
 		}
 	}
-		return 1;
+	return 1;
 }
-
 
 void validate_addr_add_table(int index, char* lblSource, char * lblDest,int operationType)
 {
@@ -342,8 +389,8 @@ void validate_addr_add_table(int index, char* lblSource, char * lblDest,int oper
 	j=0;
 	temp=int2other(typeAddr2,2,0);
 	len=strlen(temp);
-		for(i=2+len;i>=3;i--)
-			machineCode[i]=temp[j++];
+	for(i=2+len;i>=3;i--)
+		machineCode[i]=temp[j++];
 	/*The following is relevant only for operation type 1*/
 	if(operationType==1)
 	{
@@ -360,8 +407,8 @@ void validate_addr_add_table(int index, char* lblSource, char * lblDest,int oper
 		j=0;
 		temp=int2other(typeAddr1,2,0);
 		len=strlen(temp);
-			for(i=8+len;i>=9;i--)
-				machineCode[i]=temp[j++];
+		for(i=8+len;i>=9;i--)
+			machineCode[i]=temp[j++];
 	}
 
 	/*12-15 Operand Code*/
@@ -371,8 +418,8 @@ void validate_addr_add_table(int index, char* lblSource, char * lblDest,int oper
 	else if(operationType==2)
 		temp=int2other(index+OPER1_LENGTH,2,0);
 	len=strlen(temp);
-		for(i=11+len;i>=12;i--)
-			machineCode[i]=temp[j++];
+	for(i=11+len;i>=12;i--)
+		machineCode[i]=temp[j++];
 
 
 	newitem=(opcode_node  *)malloc(sizeof(opcode_node));
@@ -432,7 +479,6 @@ void validate_addr_add_table(int index, char* lblSource, char * lblDest,int oper
 		handle_rest_of_labels(typeAddr2,exteranlLbl2,internalLbl21);
 }
 
-
 void handle_rest_of_labels(addr_methods type,char * exteranlLbl,char *internalLbl)
 {
 	int i=1,j=0;/*Indicates how many node we have to add to the Main Assembly table*/
@@ -442,80 +488,80 @@ void handle_rest_of_labels(addr_methods type,char * exteranlLbl,char *internalLb
 		i++;
 	for(;j<i;j++)
 	{
-			newitem=(opcode_node *)malloc(sizeof(opcode_node));
-			if(newitem==NULL)/*Check if memory error*/
+		newitem=(opcode_node *)malloc(sizeof(opcode_node));
+		if(newitem==NULL)/*Check if memory error*/
+		{
+			printf(ERR_MEMORY_LOCATION_FAILURE,line_pos);
+			exit(1);
+		}
+		newitem->label=NULL;
+		newitem->addr=IC++;
+		newitem->command=NULL;
+		newitem->mark='r';
+		newitem->arguments= NULL;
+		newitem->base2code=exteranlLbl;
+		if(j==1)
+		{
+			if(type==INDEX_ADDR)/*If its a direct index method(#2)*/
 			{
-				printf(ERR_MEMORY_LOCATION_FAILURE,line_pos);
-				exit(1);
+				newitem->mark='a';
+				newitem->arguments= (char *)malloc(2*sizeof(char));
+				strcpy(newitem->arguments,"*");/*This is for iteration 2 - indicates that it is a label that is used as data*/
 			}
-			newitem->label=NULL;
-			newitem->addr=IC++;
-			newitem->command=NULL;
-			newitem->mark='r';
-			newitem->arguments= NULL;
-			newitem->base2code=exteranlLbl;
-			if(j==1)
+		}
+		if( type!=IMMIDATE_ADDR)
+		{
+			if(j==0 )
 			{
-				if(type==INDEX_ADDR)/*If its a direct index method(#2)*/
-				{
-					newitem->mark='a';
-					newitem->arguments= (char *)malloc(2*sizeof(char));
-					strcpy(newitem->arguments,"*");/*This is for iteration 2 - indicates that it is a label that is used as data*/
-				}
-			}
-			if( type!=IMMIDATE_ADDR)
-			{
-				if(j==0 )
-				{
-					newitem->base2code = (char *)malloc(strlen(exteranlLbl) * sizeof(char));
-					newitem->base2code =exteranlLbl;
-				}
-				else
-				{
-					newitem->base2code = (char *)malloc(strlen(internalLbl) * sizeof(char));
-					newitem->base2code =internalLbl;
-				}
-			}
-			if(type!=IMMIDATE_ADDR)/*Handle first methoud(immidate-0)seperatly, meaning no need to enter memeory address after */
-			{
-				newitem->base4code= (char *)malloc(2*sizeof(char));
-				strcpy(newitem->base4code,"?");
+				newitem->base2code = (char *)malloc(strlen(exteranlLbl) * sizeof(char));
+				newitem->base2code =exteranlLbl;
 			}
 			else
 			{
-				newitem->mark='a';
-				newitem->base4code=NULL;
+				newitem->base2code = (char *)malloc(strlen(internalLbl) * sizeof(char));
+				newitem->base2code =internalLbl;
 			}
-			newitem->location=CODE;
-			newitem->next=NULL;
-			AddNodeToAssemblyTable(newitem);
+		}
+		if(type!=IMMIDATE_ADDR)/*Handle first methoud(immidate-0)seperatly, meaning no need to enter memeory address after */
+		{
+			newitem->base4code= (char *)malloc(2*sizeof(char));
+			strcpy(newitem->base4code,"?");
+		}
+		else
+		{
+			newitem->mark='a';
+			newitem->base4code=NULL;
+		}
+		newitem->location=CODE;
+		newitem->next=NULL;
+		AddNodeToAssemblyTable(newitem);
 	}
 }
 
-void UpdatelTableAddress()
+void update_tbl_addr(opcode_list * opcode_table, symbol_list * symbol_table) /*update_tbl_addr*/
 {
-	struct Symbol *temp=headSymTable;
-	struct CodeAssemblyTbl *tempAssm=headAssemblyTable;
+	symbol_node * temp=symbol_table->head;
+	opcode_node *tempAssm=opcode_table->head;
 	while(temp)
 	{
 		if(temp->location!=EXTERN)
 		{
-			if(temp->type == TBL_DATA)
+			if(temp->type == DATA)
 			{
-				temp->decValue +=IC;
-				temp->dozenValue=ConvertDecToOther(temp->decValue ,12,4);
+				temp->dec_value +=IC;
+				temp->base4_value=int2other(temp->dec_value ,4);
 			}
 		}
 		if(temp->location==EXTERN)
-			temp->dozenValue=ConvertDecToOther(temp->decValue ,12,4);
+			temp->base4_value=int2other(temp->dec_value ,4);
 		temp=temp->next;
 	}
 	while(tempAssm)
 	{
-		if(tempAssm->location == TBL_DATA)
+		if(tempAssm->location == DATA)
 		{
 			tempAssm->decAddr  +=IC;
-			tempAssm->doeznAddr=ConvertDecToOther(tempAssm->decAddr ,12,8);
+			tempAssm->doeznAddr=int2other(tempAssm->decAddr ,12,8);
 		}
 		tempAssm=tempAssm->next;
 	}

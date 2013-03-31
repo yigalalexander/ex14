@@ -25,8 +25,8 @@ char * first_label;
  */
 
 void first_pass(FILE input,opcode_list * target, symbol_list * entries); /*add parameters here!*/
-void second_pass(FILE input,opcode_list * target, symbol_list * entries, symbol_list * externs); /*add parameters here!*/
-void UpdatelTableAddress(); /*update the table addresses after both passes */
+void second_pass(opcode_list * opcode_table, symbol_list * symbol_table); /*add parameters here!*/
+void update_tbl_addr(opcode_list * opcode_table, symbol_list * symbol_table); /*update the table addresses after both passes */
 char* is_valid_number(char *string);
 addr_methods type_of_addressing(char *lbl,char **externalLbl, char **internalLbl1,char **internalLbl2);
 

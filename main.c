@@ -26,10 +26,11 @@ int main(int argc, const char * argv[])
 		printf(ERR_MEMORY_LOCATION_FAILURE,line_pos);
 		exit(1);
 	}
+	symbol_list * symbols_table;
+	opcode_list * machine_code_table;
 	for (i=1; i<argc; ++i ) /* iterate over all input files */
 	{
-		symbol_list * symbols_table;
-		opcode_list * machine_code_table;
+
 
 		symbols_table=new_symbol_list(); /*new table for symbols*/
 		machine_code_table=new_opcode_list(); /*new table for code*/
@@ -43,12 +44,13 @@ int main(int argc, const char * argv[])
 			exit(1);
 		}
 
-		first_pass(INPUT_PROGRAM,machine_code_table,symbols_table);
+		first_pass(INPUT_PROGRAM,machine_code_table,symbols_table); /*read the file into the table, read symbols*/
 
 		if(!errors_found) /*output only if no errors were found*/
 		{
-			UpdatelTableAddress();
-			second_pass();
+			update_tbl_addr(machine_code_table,symbols_table);
+
+			second_pass(machine_code_table,symbols_table);
 			if(!errors_found)
 			{
 				write_object_file(argv[i],machine_code_table);
@@ -60,6 +62,7 @@ int main(int argc, const char * argv[])
 		flush_symbols(symbols_table);
 		flush_opcode_list(machine_code_table);
 	}
+	exit(1);
 
 }
 
