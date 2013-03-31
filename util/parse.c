@@ -491,3 +491,33 @@ void handle_rest_of_labels(addr_methods type,char * exteranlLbl,char *internalLb
 			AddNodeToAssemblyTable(newitem);
 	}
 }
+
+void UpdatelTableAddress()
+{
+	struct Symbol *temp=headSymTable;
+	struct CodeAssemblyTbl *tempAssm=headAssemblyTable;
+	while(temp)
+	{
+		if(temp->location!=EXTERN)
+		{
+			if(temp->type == TBL_DATA)
+			{
+				temp->decValue +=IC;
+				temp->dozenValue=ConvertDecToOther(temp->decValue ,12,4);
+			}
+		}
+		if(temp->location==EXTERN)
+			temp->dozenValue=ConvertDecToOther(temp->decValue ,12,4);
+		temp=temp->next;
+	}
+	while(tempAssm)
+	{
+		if(tempAssm->location == TBL_DATA)
+		{
+			tempAssm->decAddr  +=IC;
+			tempAssm->doeznAddr=ConvertDecToOther(tempAssm->decAddr ,12,8);
+		}
+		tempAssm=tempAssm->next;
+	}
+
+}

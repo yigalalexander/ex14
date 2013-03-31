@@ -55,7 +55,7 @@ void write_object_file(char *fname, opcode_list * oplist)
 	fclose(ASSEMBLY_TABLE);
 }
 
-void write_target_file(char* fname, symbol_list * list)
+void write_extern_file(char* fname, symbol_list * list)
 {
 	int flag = 0;
 	symbol_node * curr;
@@ -89,13 +89,13 @@ void write_target_file(char* fname, symbol_list * list)
 	fclose(TARGET);
 }
 
-void write_entry_file(symbol_list * entry_list, char *fname)
+void write_entry_file(char* fname, symbol_list * list)
 {
 	int flag = 0;
 	symbol_node * curr;
 	char *target_file;
 	FILE * TARGET;
-	curr = entry_list->head;
+	curr = list->head;
 
 	target_file = (char *) malloc((strlen(fname) + 5) * sizeof(char));
 	if (target_file == NULL ) {

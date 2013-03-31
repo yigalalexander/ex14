@@ -97,7 +97,7 @@ opcode_node *get_opcode_by_addr(opcode_list *list, int addr)
 	else return (NULL); /*failed retrieve*/
 }
 
-int flush_list(opcode_list *list)
+int flush_opcode_list(opcode_list *list)
 {
 	opcode_node *curr, *to_clear;
 	int fc; /*free count*/
