@@ -15,6 +15,10 @@
 typedef struct symbol {
 	int addr; /*assigned address of the symbol*/
 	char *name; /*symbol name*/
+	int dec_value;
+	char * base4_value;
+	symbol_location location; /* where does it belong */
+	symbol_type type;
 	struct symbol *next;
 } symbol_node;
 
@@ -51,14 +55,17 @@ int symbol_exists_in (symbol_list * list, char * symbol) /*check if 'symbol' exi
 	/*made it to NULL pointer return 0*/
 }
 
-int add_symbol (symbol_list * list, char * symbol, int address) /*add a new symbol with a name and an address*/
+int add_symbol (symbol_list * list, char * symbol, int address,symbol_type sym_type,symbol_location sym_loc) /*add a new symbol with a name and an address*/
 {
-	symbol_node *temp,*new;
+	symbol_node *temp;
+	symbol_node *new;
 	if (list!=NULL && (new=malloc(sizeof(symbol_node)))!=NULL) /*if allocation worked*/
 	{
 		new->addr=address;
 		strcpy(new->name,symbol);
 		new->next=NULL;
+		new->location=sym_loc;
+		new->type=sym_type;
 
 		if (list->head==NULL) /*if its an empty list*/
 		{
