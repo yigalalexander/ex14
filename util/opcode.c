@@ -65,21 +65,21 @@ opcode_list *new_opcode_list(int start_addr)
 }
 
 
-void add_opcode(opcode_list *list, opcode_node new_item)
+void add_opcode(opcode_list *list, opcode_node * new_item)
 {
 	opcode_node *temp;
 
-		if(!(list->head)) /*if this is an empty list*/
-			list->head = new_item;
-		else /* not empty, find the last node and add to it */
+	if(!(list->head)) /*if this is an empty list*/
+		list->head = new_item;
+	else /* not empty, find the last node and add to it */
+	{
+		temp=(list->head);
+		while(temp->next)
 		{
-			temp=(list->head);
-			while(temp->next)
-			{
-				temp=temp->next;
-			}
-			temp->next=new_item;
+			temp=temp->next;
 		}
+		temp->next=new_item;
+	}
 }
 
 opcode_node *get_opcode_by_addr(opcode_list *list, int addr)

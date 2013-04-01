@@ -41,7 +41,7 @@ typedef struct opl {
 
 
 
-void add_opcode(opcode_list *list, opcode_node new); /* add a new opcode_node to the list */
+void add_opcode(opcode_list *list, opcode_node * new); /* add a new opcode_node to the list */
 opcode_node * get_opcode_by_addr(opcode_list * list, int addr); /*receives a list, and an address and returns a point to the relevant opcode entry*/
 int flush_opcode_list(opcode_list * list); /*flushes a list from the memory*/
 opcode_node * new_opcode_node();
