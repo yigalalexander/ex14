@@ -34,6 +34,7 @@ int main(int argc, const char * argv[])
 
 		symbols_table=new_symbol_list(); /*new table for symbols*/
 		machine_code_table=new_opcode_list(); /*new table for code*/
+		init_globals();
 		strcpy(fname,argv[i]);
 		strcat(fname,".as");
 
@@ -64,5 +65,13 @@ int main(int argc, const char * argv[])
 	}
 	exit(1);
 
+}
+
+void  init_globals()
+{
+	errors_found=0;
+	IC=100;
+	DC=0;
+	line_pos=0;
 }
 

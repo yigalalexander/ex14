@@ -20,7 +20,7 @@ typedef struct {
 } opcode_bits;
 
 typedef struct opn {
-	int addr; /*opcode address*/
+	int addr; /*Decimal opcode address*/
 	char * command; /*command as was read from the file*/
 	char *label; /* labels as was read from the files*/
 	char * arguments; /*its arguments*/

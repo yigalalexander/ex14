@@ -13,7 +13,7 @@
 char * get_first_word (char *);
 int line_pos;
 int errors_found;
-int IC;
+int IC,DC;
 char * first_label;
 
 /*
