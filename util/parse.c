@@ -43,16 +43,16 @@ void first_pass(FILE input, opcode_list * target, symbol_list * entries)
 		if((i+=IsSymbolExist(line+i,&label))==-1)
 		{
 			errors_found+=1;
-			printf(ERR_INVALID_SYMBOL,addressing_validate_match);
+			printf(ERR_INVALID_SYMBOL,addressing_validate_match()); /*    <<<<<<<<<<<<<<------------ needs attention */
 		}
 		else
 		{
 			while(isspace(temp=line[i++])); /*Skip white-spaces*/
 			i--;
 			if(line[i]=='.')/*Check if contains instruction*/
-				instruction_parse(label,line+i);
+				instruction_parse(target,entries,label,line+i);
 			else
-				general_operation_parse(label,line+i);
+				general_operation_parse(target,entries,label,line+i);
 
 		}
 	}while(!isEOF);
@@ -118,13 +118,10 @@ void second_pass(opcode_list * opcode_table, symbol_list * symbol_table)
 				printf(ERR_SYMBOL_NOT_EXIST_NAME ,line_pos);
 			}
 		}
-		temp->base4code=int2other(ConvertBinToDec(temp->base2code),4);
+		temp->base4code=int2other(bin2int(temp->base2code),4);
 		temp=temp->next;
 	}
 }
-
-
-
 
 
 char* is_valid_number(char *string)
@@ -327,7 +324,7 @@ int addressing_validate_match(int cmdIndex,addr_methods typeAddr,int numOper)
 	return 1;
 }
 
-void validate_addr_add_table(int index, char* lblSource, char * lblDest,int operationType)
+void validate_addr_add_table(opcode_list * target, symbol_list * entries,int index, char* lblSource, char * lblDest,int operationType)
 {
 	int i=0,len,j=0;
 	addr_methods  typeAddr1, typeAddr2;
@@ -343,14 +340,14 @@ void validate_addr_add_table(int index, char* lblSource, char * lblDest,int oper
 		}
 		else
 		{
-			if(addressing_validate_match(index,typeAddr1,1)==0)/*Error- Non mathcing allowed addressing method*/
+			if(addressing_validate_match(index,typeAddr1,1)==0)/*Error- Non matching allowed addressing method*/
 			{
 				return;
 			}
 		}
 	}
 
-	if((typeAddr2=type_of_addressing(lblDest,&exteranlLbl2,&internalLbl21,&internalLbl22))==NA)/*Analyse label destination*/
+	if((typeAddr2=type_of_addressing(lblDest,&exteranlLbl2,&internalLbl21,&internalLbl22))==NA)/*Analyze label destination*/
 	{
 		return;
 	}
@@ -358,12 +355,12 @@ void validate_addr_add_table(int index, char* lblSource, char * lblDest,int oper
 	{
 		if(operationType==1)
 		{
-			if(addressing_validate_match(index,typeAddr2,2)==0)/*Error- Non mathcing allowed addressing method*/
+			if(addressing_validate_match(index,typeAddr2,2)==0)/*Error- Non matching allowed addressing method*/
 				return;
 		}
 		else
 		{
-			if(addressing_validate_match(index+OPER1_LENGTH,typeAddr2,2)==0)/*Error- Non mathcing allowed addressing method*/
+			if(addressing_validate_match(index+OPER1_LENGTH,typeAddr2,2)==0)/*Error- Non matching allowed addressing method*/
 				return;
 		}
 	}
@@ -466,25 +463,25 @@ void validate_addr_add_table(int index, char* lblSource, char * lblDest,int oper
 	newitem->mark='a';
 	newitem->location=CODE;
 	newitem->next = NULL;
-	AddNodeToAssemblyTable(newitem);
+	add_opcode(target,newitem);
 
 	if(first_label)
-		AddNodeToSymTable(first_label,IC-1,CODE,LOCAL);
+		add_symbol(entries,first_label,IC-1,CODE,LOCAL);
 
 	/*Handle additional addressing methods for both arguments*/
 	if(operationType==1)
 		if(typeAddr1!=DIRECT_REG_ADDR)
 		{
-			handle_rest_of_labels(typeAddr1,exteranlLbl,internalLbl1);
+			handle_rest_of_labels(target,entries,typeAddr1,exteranlLbl,internalLbl1);
 		}
 	if(typeAddr2!=IMMIDATE_ADDR && typeAddr2!=DIRECT_REG_ADDR)
-		handle_rest_of_labels(typeAddr2,exteranlLbl2,internalLbl21);
+		handle_rest_of_labels(target,entries,typeAddr2,exteranlLbl2,internalLbl21);
 }
 
-void handle_rest_of_labels(addr_methods type,char * exteranlLbl,char *internalLbl)
+void handle_rest_of_labels(opcode_list * target, symbol_list * entries,addr_methods type,char * exteranlLbl,char *internalLbl)
 {
 	int i=1,j=0;/*Indicates how many node we have to add to the Main Assembly table*/
-	opcode_node *newitem;
+	opcode_node * newitem;
 
 	if(internalLbl!=NULL)
 		i++;
@@ -536,7 +533,7 @@ void handle_rest_of_labels(addr_methods type,char * exteranlLbl,char *internalLb
 		}
 		newitem->location=CODE;
 		newitem->next=NULL;
-		AddNodeToAssemblyTable(newitem);
+		add_opcode(target,newitem);
 	}
 }
 
@@ -594,7 +591,41 @@ int determine_operation_type(char* str,int *index)
 	return 0;
 }
 
-void parse_operation_type1(char* command, int index)
+void general_operation_parse(opcode_list * target, symbol_list * entries,char* label, char* Command)
+{
+
+	int typeOfCommand,index;
+	int i=0;
+	char *cmdTemp=NULL;
+
+	/*Check type of command*/
+
+	while(Command[i] != ' ' && Command[i] != '\n' && Command[i]!='\t'  && Command[i]!='\0') /*Read till hit a space or a tab or EOL*/
+	{
+		cmdTemp=(char *)realloc(cmdTemp,(i+1)*sizeof(char));
+		cmdTemp[i]=Command[i];
+		i++;
+	}
+	cmdTemp=(char *)realloc(cmdTemp,(i+1)*sizeof(char));
+	cmdTemp[i]='\0';
+	ConvertToUpper(cmdTemp);
+
+	first_label=label;
+	if(!(typeOfCommand=determine_operation_type(cmdTemp,&index)))
+	{
+		printf(ERR_INVALID_COMMAND_NAME,line_pos);
+		errors_found+=1;
+		return;
+	}
+	else if (typeOfCommand==1)
+		parse_operation_type1(target,entries,Command +i , index);
+	else if(typeOfCommand==2)
+		parse_operation_type2(target,entries,Command +i, index);
+	else
+		parse_operation_type3(target,entries,Command +i , index);
+}
+
+void parse_operation_type1(opcode_list * target, symbol_list * entries,char* command, int index)
 {
 	int temp,i=0;
 	char *firstOper=NULL, *secondOper=NULL;
@@ -613,8 +644,8 @@ void parse_operation_type1(char* command, int index)
 		firstOper=(char *)realloc(firstOper, (i+1)*sizeof(char));
 		firstOper[i++]=*command++;
 	}
-		firstOper=(char *)realloc(firstOper, (i+1)*sizeof(char));
-		firstOper[i]='\0';
+	firstOper=(char *)realloc(firstOper, (i+1)*sizeof(char));
+	firstOper[i]='\0';
 	if(*command=='\n')/*Return if reached EOL(Only one operand)*/
 	{
 		printf(ERR_MISSING_OPERAND, line_pos);
@@ -659,7 +690,7 @@ void parse_operation_type1(char* command, int index)
 	secondOper=(char *)realloc(secondOper, (i+1)*sizeof(char));
 	if(secondOper==NULL)
 	{
-			printf(ERR_MEMORY_LOCATION_FAILURE,line_pos);
+		printf(ERR_MEMORY_LOCATION_FAILURE,line_pos);
 	}
 	secondOper[i]='\0';
 	while(isspace(temp=*command++)); /*Skip white-spaces*/
@@ -675,7 +706,7 @@ void parse_operation_type1(char* command, int index)
 
 
 
-void parse_operation_type2(char* command, int index)
+void parse_operation_type2(opcode_list * target, symbol_list * entries,char* command, int index)
 {
 	int temp,i=0;
 	char operand[31];
@@ -714,9 +745,9 @@ void parse_operation_type2(char* command, int index)
 		validate_addr_add_table(index,NULL,operand,2);
 }
 
-void parse_operation_type3(char* command, int index)
+void parse_operation_type3(opcode_list * target, symbol_list * entries,char* command, int index)
 {
-	struct CodeAssemblyTbl *newitem=NULL;
+	opcode_node *  *newitem=NULL;
 	int i=0,temp,j=0;
 	char *numCmd=NULL;
 
@@ -726,17 +757,17 @@ void parse_operation_type3(char* command, int index)
 	{
 		errors_found+=1;
 		printf(ERR_EXTRA_OPERAND,line_pos);
-	    return;
+		return;
 	}
 
 	/*Due to simple type of operatin, the handling would be localy*/
-	newitem=(struct CodeAssemblyTbl  *)malloc(sizeof(struct CodeAssemblyTbl));
+	newitem=(opcode_node *   *)malloc(sizeof(opcode_node * ));
 	if(newitem==NULL)/*Check if memory error*/
 	{
 		printf(ERR_MEMORY_LOCATION_FAILURE,line_pos);
 		exit(1);
 	}
-	newitem->label=labelGlobal;
+	newitem->label=first_label;
 	newitem->decAddr=IC++;
 	newitem->command=(char *)malloc((strlen(methods[index+OPER2_LENGTH+OPER1_LENGTH ].commandName)+1)*sizeof(char));
 	strcpy(newitem->command,methods[index+OPER2_LENGTH+OPER1_LENGTH].commandName);
@@ -757,43 +788,10 @@ void parse_operation_type3(char* command, int index)
 	newitem->next=NULL;
 	AddNodeToAssemblyTable(newitem);
 
-	if(labelGlobal)
-		AddNodeToSymTable(labelGlobal,IC-1,CODE,LOCAL);
+	if(first_label)
+		AddNodeToSymTable(first_label,IC-1,CODE,LOCAL);
 }
 
-
-void general_operation_parse(char* label, char* Command)
-{
-
-	int i=0, typeOfCommand,index;
-	char *cmdTemp=NULL;
-
-	/*Check type of command*/
-
-	while(Command[i] != ' ' && Command[i] != '\n' && Command[i]!='\t'  && Command[i]!='\0') /*Read till hit a space or a tab or EOL*/
-	{
-		cmdTemp=(char *)realloc(cmdTemp,(i+1)*sizeof(char));
-		cmdTemp[i]=Command[i];
-		i++;
-	}
-	cmdTemp=(char *)realloc(cmdTemp,(i+1)*sizeof(char));
-	cmdTemp[i]='\0';
-	ConvertToUpper(cmdTemp);
-
-	labelGlobal=label;
-	if(!(typeOfCommand=determine_operation_type(cmdTemp,&index)))
-	{
-		printf(ERR_INVALID_COMMAND_NAME,line_pos);
-		errors_found+=1;
-		return;
-	}
-	else if (typeOfCommand==1)
-		parse_operation_type1(Command +i , index);
-	else if(typeOfCommand==2)
-		parse_operation_type2( Command +i, index);
-	else
-		parse_operation_type3(Command +i , index);
-}
 
 void InstructionParse(char* label, char* command)
 {
@@ -839,9 +837,9 @@ void InstructionParse(char* label, char* command)
 
 void InsertDataToAssemblyTable(char *label,char *instruction,char *currentArg,char *binaryOp)
 {
-	struct CodeAssemblyTbl *newitem=NULL;
+	opcode_node * newitem=NULL;
 
-	newitem=(struct CodeAssemblyTbl  *)malloc(sizeof(struct CodeAssemblyTbl));
+	newitem=(opcode_node *   *)malloc(sizeof(opcode_node * ));
 	if(newitem==NULL)/*Check if memory error*/
 	{
 		printf(ERR_MEMORY_LOCATION_FAILURE,line_pos);
@@ -930,7 +928,7 @@ void HandleStringInstruction(char *command,char *label)
 	int temp=0;
 	char arg[2]={'\0'},*binaryArg=NULL;
 	while(isspace(*command++)); /*Skip white-spaces*/
-		command--;
+	command--;
 	if(*command=='\0')
 	{
 		printf(ERR_MISSING_DATA_MEMBERS,line_pos);
@@ -970,7 +968,7 @@ void HandleStringInstruction(char *command,char *label)
 		return;
 	}
 	while(isspace(temp=*command++)); /*Skip white-spaces*/
-		command--;
+	command--;
 	/*only one string should apearin each instruction*/
 	if(*command!='\0')
 	{
@@ -1036,7 +1034,7 @@ int IsValidLabel(char *command, char **label)
 		if(command[index]!='\0') /*the current word is not a label*/
 		{
 			*label=NULL;
-				errors_found++;
+			errors_found++;
 			printf(ERR_INVALID_LABEL, line_pos);
 		}
 		else /*found a lable*/
