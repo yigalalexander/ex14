@@ -670,7 +670,7 @@ void parse_operation_type1(char* command, int index)
 		errors_found+=1;
 		return;
 	}
-	ValidateAddressingAndAddToTable(index,firstOper,secondOper,1);
+	validate_addr_add_table(index,firstOper,secondOper,1);
 }
 
 
@@ -711,7 +711,7 @@ void parse_operation_type2(char* command, int index)
 		}
 	}
 	else
-		ValidateAddressingAndAddToTable(index,NULL,operand,2);
+		validate_addr_add_table(index,NULL,operand,2);
 }
 
 void parse_operation_type3(char* command, int index)
@@ -741,17 +741,17 @@ void parse_operation_type3(char* command, int index)
 	newitem->command=(char *)malloc((strlen(methods[index+OPER2_LENGTH+OPER1_LENGTH ].commandName)+1)*sizeof(char));
 	strcpy(newitem->command,methods[index+OPER2_LENGTH+OPER1_LENGTH].commandName);
 	newitem->operands=NULL;
-	newitem->binMachineCode = (char *)malloc(17 * sizeof(char));
+	newitem->base2code = (char *)malloc(17 * sizeof(char));
 	numCmd= ConvertDecToOther(index+OPER2_LENGTH+OPER1_LENGTH,2,0);
 	temp=strlen(numCmd);
 	for(i=0;i<4-temp;i++)
-		newitem->binMachineCode [i]='0';
+		newitem->base2code [i]='0';
 	for(;i<4;i++)
-		newitem->binMachineCode [i]=numCmd[j++];
+		newitem->base2code [i]=numCmd[j++];
 	for(i=4;i<16;i++)
-		newitem->binMachineCode[i] ='0';
-	newitem->binMachineCode[i]='\0';
-	newitem->doeznMachineCode=ConvertDecToOther(ConvertBinToDec(newitem->binMachineCode),12,8);
+		newitem->base2code[i] ='0';
+	newitem->base2code[i]='\0';
+	newitem->base4code=ConvertDecToOther(ConvertBinToDec(newitem->base2code),12,8);
 	newitem->mark='a';
 	newitem->location=CODE;
 	newitem->next=NULL;
@@ -837,13 +837,6 @@ void InstructionParse(char* label, char* command)
 	}
 }
 
-/*============================================
-This function create a node of kind CodeAssemblyTbl after analize the command line
-@param name= "label" - the label string
-@param name= "instruction" the instruction kind, can be data/string/extern/entry
-@param name= "currentArg" the current examined argument
-@param name= = "binaryOp" the conversion to binary of current operator
-=============================================*/
 void InsertDataToAssemblyTable(char *label,char *instruction,char *currentArg,char *binaryOp)
 {
 	struct CodeAssemblyTbl *newitem=NULL;
@@ -858,19 +851,15 @@ void InsertDataToAssemblyTable(char *label,char *instruction,char *currentArg,ch
 	(newitem)->decAddr=DC++;
 	(newitem)->command=instruction;
 	(newitem)->operands=currentArg;
-	(newitem)->binMachineCode= binaryOp;
-	(newitem)->doeznMachineCode= NULL;
+	(newitem)->base2code= binaryOp;
+	(newitem)->base4code= NULL;
 	(newitem)->mark= ' ';
 	(newitem)->next=NULL;
 	(newitem)->location =TBL_DATA;
 	AddNodeToAssemblyTable(newitem);
 }
 
-/*==============================
-This function analize the command string in case this is data instruction
-@param name = "command" - the command string
-@param name = "label" - the label string if exist in current line
-================================*/
+
 void HandleDataInstruction(char *command,char *label)
 {
 	int argLen=1,isMinus=0,temp=0;
@@ -935,11 +924,7 @@ void HandleDataInstruction(char *command,char *label)
 	}
 }
 
-/*==============================
-This function analize the command string in case this is string instruction
-@param  name = "command" - the command string
-@param name = "label" the label string if exists in current line
-================================*/
+
 void HandleStringInstruction(char *command,char *label)
 {
 	int temp=0;
@@ -995,10 +980,7 @@ void HandleStringInstruction(char *command,char *label)
 	}
 }
 
-/*==============================
-This function analize the command string in case this is extern instruction
-@param name = "command" - the command string
-================================*/
+
 void HandleExternInstruction(char *command)
 {
 	char *externLbl=NULL;
@@ -1016,18 +998,13 @@ void HandleExternInstruction(char *command)
 	}
 
 }
-/*===============================
-Validate the label's legality for extern/entry instruction
-*@param name = "command" - the command string starting from the begining.
-*@param name = "label" - pointer to char array to contain the label if exist.
-==================================*/
 
 void HandleEntryInstruction(char *command)
 {
 	char *entryLbl=NULL;
 	if(IsValidLabel(command,&entryLbl)!=-1)
 	{
-		AddNodeToSymTable(entryLbl,0,TBL_CODE,ENTRY);
+		AddNodeToSymTable(entryLbl,0,CODE,ENTRY);
 	}
 	else
 	{
@@ -1064,7 +1041,7 @@ int IsValidLabel(char *command, char **label)
 		}
 		else /*found a lable*/
 		{
-			if(labelLen> MAX_LABEL_LENGTHGTH)
+			if(labelLen> MAX_LABEL_LENGTH)
 			{
 				printf(ERR_INVALID_LABEL,line_pos);
 				errors_found++;
