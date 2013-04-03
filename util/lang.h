@@ -16,6 +16,11 @@
 #define OPER2_LENGTH 9
 #define OPER3_LENGTH 2
 
+#define DATA_INSTRUCTION "data"
+#define STRING_INSTRUCTION "string"
+#define ENTRY_INSTRUCTION "entry"
+#define EXTERN_INSTRUCTION "extern"
+
 typedef enum{IMMIDATE_ADDR,
 	DIRECT_ADDR,
 	INDEX_ADDR,

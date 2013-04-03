@@ -10,11 +10,12 @@
 #ifndef PARSE_H_
 #define PARSE_H_
 
-char * get_first_word (char *);
-int line_pos;
-int errors_found;
-int IC,DC;
-char * first_label;
+typedef struct {
+	opcode_list * code_table;
+	symbol_list * symbol_table;
+	int line_pos, errors_found,IC,DC;
+	char * first_label;
+} parsing_globals;
 
 /*
  * Receives an input files to run the first parsing pass over the file
@@ -24,11 +25,12 @@ char * first_label;
  * @externs - extern table
  */
 
-void first_pass(FILE input,opcode_list * target, symbol_list * entries); /*add parameters here!*/
-void second_pass(opcode_list * opcode_table, symbol_list * symbol_table); /*add parameters here!*/
-void update_tbl_addr(opcode_list * opcode_table, symbol_list * symbol_table); /*update the table addresses after both passes */
+void first_pass(FILE input,parsing_globals data); /*add parameters here!*/
+void second_pass(parsing_globals data); /*add parameters here!*/
+void update_tbl_addr(parsing_globals data); /*update the table addresses after both passes */
 char* is_valid_number(char *string);
 addr_methods type_of_addressing(char *lbl,char **externalLbl, char **internalLbl1,char **internalLbl2);
+void init_globals(parsing_globals this);
 
 
 #endif /* PARSE_H_ */
