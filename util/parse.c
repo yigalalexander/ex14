@@ -17,18 +17,15 @@
 
 void first_pass(FILE input, parsing_globals data)
 {
-	/* get line*/
-	/* Is it: A symbol, Pseudo instruction,*/
-
 	int i,temp,len;
 	char *label=NULL;
-	char line[80];/*line of text that will be read*/
+	char line[80];/* text line that will be read from the input file*/
 	int isEOF=0;
 	do
 	{
 		label=NULL;
 		isEOF=read_line(input,line);
-		/*is it an empty or a comment line?*/
+		/*checks if line is empty or comment line*/
 		len=strlen(line);
 		for(i=0;i<len && (temp=isspace(line[i])) ; i++);
 		if(i==strlen(line)) /*Empty line*/
@@ -68,7 +65,7 @@ int read_line(FILE *INPUT_PROGRAM, char *line) {
 		line[index++] = c;
 	}
 	line[index] = '\0';
-	if (c == EOF) /*anymore lines to read?*/
+	if (c == EOF) /*checks if any lines left to be read from the file*/
 		return (1);
 	else
 		return (0);
@@ -84,11 +81,11 @@ void second_pass(parsing_globals data)
 	while(temp)
 	{
 		/*temp->=int2other(temp->addr,4); ----- OLD line */
-		if(temp->base4code !=NULL && !(strcmp(temp->base4code,"?")))/*Check if need to update the address*/
+		if(temp->base4code !=NULL && !(strcmp(temp->base4code,"?")))/*checks if address needs to be updated*/
 		{
 			if((temp_sym=symbol_exists_in(data.symbol_table,temp->base2code)))
 			{
-				if(temp_sym->location==EXTERN)/*Enter '0' to Binary machine code*/
+				if(temp_sym->location==EXTERN)/*binary code is 0*/
 				{
 					temp->base2code= int2other(0,2,0);
 					temp->mark='e';
@@ -142,7 +139,7 @@ char* is_valid_number(parsing_globals data,char *string)
 			return NULL;
 		}
 	}
-	/*Convert to negative number 16 byets*/
+	/*negative 16 bytes number conversion*/
 	if(string[0]=='-')
 	{
 		temp=strlen(string);
@@ -174,21 +171,22 @@ char* is_valid_number(parsing_globals data,char *string)
 	return string;
 }
 
+/* checking addressing type*/
 addr_methods type_of_addressing(parsing_globals data,char *lbl,char **externalLbl, char **internalLbl1,char **internalLbl2)
 {
 	int i=0,j=0;
 	char temp[31];
 
-	if(strlen(lbl) == 2 ) /* is it a register?*/
-		if(lbl[0] == 'r'  && lbl[1]>='0' && lbl[1]<='7')/*check if fregistar*/
+	if(strlen(lbl) == 2 ) /* checking if register encountered*/
+		if(lbl[0] == 'r'  && lbl[1]>='0' && lbl[1]<='7')
 		{
 			return DIRECT_REG_ADDR;
 		}
 
-	/*end of check if register*/
 
 
-	/*Check if direct addresing	*/
+
+	/*direct addressing check*/
 	if(lbl[0]=='#')
 	{
 		if((*externalLbl=(isValidNumber(lbl+1)))==NULL)
@@ -211,7 +209,7 @@ addr_methods type_of_addressing(parsing_globals data,char *lbl,char **externalLb
 		data.errors_found +=1;
 		return NA;
 	}
-	if(lbl[j]=='\0')/*Found label*/
+	if(lbl[j]=='\0')/*label encountered*/
 	{
 		return DIRECT_ADDR;
 	}
@@ -221,13 +219,13 @@ addr_methods type_of_addressing(parsing_globals data,char *lbl,char **externalLb
 		for(i=0;lbl[j]!='\0' && lbl[j]!=']';i++)
 			temp[i]=lbl[j++];
 		temp[i]='\0';
-		if(lbl[j]=='\0')/*Error no close barket*/
+		if(lbl[j]=='\0')/*Error detected - no closing bracket*/
 		{
 			printf(ERR_INVALID_LABEL,data.line_pos);
 			data.errors_found++;
 			return NA;
 		}
-		if(temp[0]=='*')/*if Offset method*/
+		if(temp[0]=='*')/*offset method check*/
 		{
 			if(IsValidLabel(temp+1,internalLbl1)==-1)
 			{
@@ -245,7 +243,7 @@ addr_methods type_of_addressing(parsing_globals data,char *lbl,char **externalLb
 				return NA;
 			}
 		}
-		if(lbl[j]==']') /*Checking if other ] exists*/
+		if(lbl[j]==']') /*closing ] bracket check*/
 		{
 			j++;
 			if(temp[0]=='*' )/*Check if method #2*/
@@ -261,20 +259,19 @@ addr_methods type_of_addressing(parsing_globals data,char *lbl,char **externalLb
 					return NA;
 				}
 			}
-			if(lbl[j++]=='[')/*Check if 3 METHOUD*/
+			if(lbl[j++]=='[')/*Check if method #3*/
 			{
 				for(i=0;lbl[j]!='\0' && lbl[j]!=']';i++)
 					temp[i]=lbl[j++];
 				temp[i]='\0';
-				if(lbl[j]=='\0')/*unclosed brackets*/
+				if(lbl[j]=='\0')/*error - no closing bracket*/
 				{
 					printf(ERR_INVALID_LABEL,data.line_pos);
 					data.errors_found++;
 					return NA;
 				}
-				/*=================
-						  Check if register
-						  =================*/
+
+				/*Check if register*/
 
 				if(strlen(temp) == 2 )
 				{
@@ -284,14 +281,14 @@ addr_methods type_of_addressing(parsing_globals data,char *lbl,char **externalLb
 						data.errors_found++;
 						return NA;
 					}
-					else/*all is good*/
+					else
 					{
 						return INDEX_REG_ADD;
 					}
 				}
 			}
 		}
-		/*error third operand is not a register*/
+		/*error - third operand is not a register*/
 		printf(ERR_INVALID_OPERAND_NO_REG,data.line_pos);
 		data.errors_found =+1;
 		return NA;
@@ -332,7 +329,7 @@ void validate_addr_add_table(parsing_globals data,int index, char* lblSource, ch
 	opcode_node *newitem=NULL;
 	char *temp;
 
-	if(operationType == 1)/*if its operation type 1(contains label source) -> Analyse label source*/
+	if(operationType == 1)/*if its operation type 1(contains label source) -> analyze label source*/
 	{
 		if((typeAddr1=type_of_addressing(data,lblSource,&exteranlLbl,&internalLbl1,&internalLbl2))==NA)
 		{
@@ -340,7 +337,7 @@ void validate_addr_add_table(parsing_globals data,int index, char* lblSource, ch
 		}
 		else
 		{
-			if(addressing_validate_match(data,index,typeAddr1,1)==0)/*Error- Non matching allowed addressing method*/
+			if(addressing_validate_match(data,index,typeAddr1,1)==0)/*Error - addressing method mismatch*/
 			{
 				return;
 			}
@@ -355,12 +352,12 @@ void validate_addr_add_table(parsing_globals data,int index, char* lblSource, ch
 	{
 		if(operationType==1)
 		{
-			if(addressing_validate_match(data,index,typeAddr2,2)==0)/*Error- Non matching allowed addressing method*/
+			if(addressing_validate_match(data,index,typeAddr2,2)==0)/*Error - addressing method mismatch*/
 				return;
 		}
 		else
 		{
-			if(addressing_validate_match(data,index+OPER1_LENGTH,typeAddr2,2)==0)/*Error- Non matching allowed addressing method*/
+			if(addressing_validate_match(data,index+OPER1_LENGTH,typeAddr2,2)==0)/*Error - addressing method mismatch*/
 				return;
 		}
 	}
@@ -376,7 +373,7 @@ void validate_addr_add_table(parsing_globals data,int index, char* lblSource, ch
 		machineCode[i]='0';
 	machineCode[16]='\0';
 	/*0-2 Dest reg*/
-	if(typeAddr2==DIRECT_REG_ADDR)/*Put in value only if register*/
+	if(typeAddr2==DIRECT_REG_ADDR)/*write value only if register*/
 	{
 		temp=int2other(lblDest[1]-'0',2,0);
 		len=strlen(temp);
@@ -384,13 +381,14 @@ void validate_addr_add_table(parsing_globals data,int index, char* lblSource, ch
 			machineCode[i]=temp[j++];
 	}
 
-	/*3-5 Method of Dest addressing	*/
+	/*3-5 Method of destination addressing	*/
 	j=0;
 	temp=int2other(typeAddr2,2,0);
 	len=strlen(temp);
 	for(i=2+len;i>=3;i--)
 		machineCode[i]=temp[j++];
-	/*The following is relevant only for operation type 1*/
+
+	/*valid only for operation type #1*/
 	if(operationType==1)
 	{
 		/*6-8 Src reg*/
@@ -402,7 +400,7 @@ void validate_addr_add_table(parsing_globals data,int index, char* lblSource, ch
 			for(i=5+len;i>=6;i--)
 				machineCode[i]=temp[j++];
 		}
-		/*9-11 Method of Source addressing*/
+		/*9-11 methods of source addressing*/
 		j=0;
 		temp=int2other(typeAddr1,2,0);
 		len=strlen(temp);
@@ -410,7 +408,7 @@ void validate_addr_add_table(parsing_globals data,int index, char* lblSource, ch
 			machineCode[i]=temp[j++];
 	}
 
-	/*12-15 Operand Code*/
+	/*12-15 operand Code*/
 	j=0;
 	if(operationType==1)
 		temp=int2other(index,2,0);
@@ -422,7 +420,7 @@ void validate_addr_add_table(parsing_globals data,int index, char* lblSource, ch
 
 
 	newitem=(opcode_node  *)malloc(sizeof(opcode_node));
-	if(newitem==NULL)/*Check if memory error*/
+	if(newitem==NULL)/*Check if memory error encountered*/
 	{
 		printf(ERR_MEMORY_LOCATION_FAILURE,data.line_pos);
 		exit(1);
@@ -432,8 +430,8 @@ void validate_addr_add_table(parsing_globals data,int index, char* lblSource, ch
 	if(operationType ==1)
 		temp=(char *)malloc((strlen(methods[index].commandName)+1)*sizeof(char));
 	else
-		temp=(char *)malloc((strlen(methods[index+OPER1_LENGTH].commandName)+1)*sizeof(char));/*for Operation type 2 set the command acoording to index+ operation1 length*/
-	if(!temp) /*for malloc allocation error exit program*/
+		temp=(char *)malloc((strlen(methods[index+OPER1_LENGTH].commandName)+1)*sizeof(char));/*for Operation type 2 set the command according to index+operation1 length*/
+	if(!temp) /*if malloc returns error - exit the program*/
 	{
 		printf(ERR_MEMORY_LOCATION_FAILURE,data.line_pos);
 		exit(1);
@@ -446,7 +444,7 @@ void validate_addr_add_table(parsing_globals data,int index, char* lblSource, ch
 		strcpy(temp,methods[(index+OPER1_LENGTH)].commandName);
 	newitem->command=temp;
 	/*end of Handle the command*/
-	newitem->base2code	=machineCode;/*add the bin Machine Code created above to the node*/
+	newitem->base2code	=machineCode;/*add created binary machine code to the node*/
 	newitem->base4code = int2other(bin2int(machineCode),4);
 
 	if(operationType==1)/*Creating the arguments symbol in the main node */
@@ -480,7 +478,7 @@ void validate_addr_add_table(parsing_globals data,int index, char* lblSource, ch
 
 void handle_rest_of_labels(parsing_globals data,addr_methods type,char * exteranlLbl,char *internalLbl)
 {
-	int i=1,j=0;/*Indicates how many node we have to add to the Main Assembly table*/
+	int i=1,j=0;/*Indicates how many nodes we have to add to the Main Assembly table*/
 	opcode_node * newitem;
 
 	if(internalLbl!=NULL)
@@ -488,7 +486,7 @@ void handle_rest_of_labels(parsing_globals data,addr_methods type,char * exteran
 	for(;j<i;j++)
 	{
 		newitem=(opcode_node *)malloc(sizeof(opcode_node));
-		if(newitem==NULL)/*Check if memory error*/
+		if(newitem==NULL)/*Check if memory error encountered*/
 		{
 			printf(ERR_MEMORY_LOCATION_FAILURE,data.line_pos);
 			exit(1);
@@ -501,7 +499,7 @@ void handle_rest_of_labels(parsing_globals data,addr_methods type,char * exteran
 		newitem->base2code=exteranlLbl;
 		if(j==1)
 		{
-			if(type==INDEX_ADDR)/*If its a direct index method(#2)*/
+			if(type==INDEX_ADDR)/*check if direct index method #2*/
 			{
 				newitem->mark='a';
 				newitem->arguments= (char *)malloc(2*sizeof(char));
@@ -521,7 +519,7 @@ void handle_rest_of_labels(parsing_globals data,addr_methods type,char * exteran
 				newitem->base2code =internalLbl;
 			}
 		}
-		if(type!=IMMIDATE_ADDR)/*Handle first methoud(immidate-0)seperatly, meaning no need to enter memeory address after */
+		if(type!=IMMIDATE_ADDR)/*Handle first method (immediate-0) separately, meaning no need to enter memory address*/
 		{
 			newitem->base4code= (char *)malloc(2*sizeof(char));
 			strcpy(newitem->base4code,"?");
@@ -561,11 +559,11 @@ void update_tbl_addr(parsing_globals data) /*update_tbl_addr*/
 		{
 			tempAssm->addr  +=data.IC;
 		}
-		tempAssm=tempAssm->next; /*advance forward */
+		tempAssm=tempAssm->next; /*advance*/
 	}
 
 }
-/*****************************/
+/*Check operation type*/
 int determine_operation_type(char* str,int *index)
 {
 	int i;
@@ -653,7 +651,7 @@ void parse_operation_type1(parsing_globals data,char* command, int index)
 		return;
 	}
 
-	/*Looking for a ','*/
+	/*Looking for ','*/
 	while(isspace(temp=*command++)); /*Skip white-spaces*/
 	command--;
 	if(*command!=',')
@@ -665,7 +663,7 @@ void parse_operation_type1(parsing_globals data,char* command, int index)
 		data.errors_found+=1;
 		return;
 	}
-	command++; /*Skip the ','*/
+	command++; /*Skip ','*/
 	while(isspace(temp=*command++)); /*Skip white-spaces*/
 	command--;
 	if(*command=='\n') /*Check if no operands*/
@@ -712,7 +710,7 @@ void parse_operation_type2(parsing_globals data,char* command, int index)
 	char operand[31];
 	while(isspace(temp=*command++));
 	command--;
-	if(*command=='\n')/*error- no operand*/
+	if(*command=='\n')/*error - no operand*/
 	{
 		data.errors_found +=  1;
 		printf(ERR_MISSING_OPERAND,data.line_pos);
@@ -751,9 +749,9 @@ void parse_operation_type3(parsing_globals data,char* command, int index)
 	int i=0,temp,j=0;
 	char *numCmd=NULL;
 
-	while(isspace(temp=*command++)); /*Skip white-spaces - Read till hit EOL*/
+	while(isspace(temp=*command++)); /*Skip white-spaces - Read till EOL encountered*/
 	command--;
-	if(*command!='\n' && *command!='\0')/*Error- operation type 3 is supposed to not have any operands*/
+	if(*command!='\n' && *command!='\0')/*Error - operation type 3 is expected to have no operands*/
 	{
 		data.errors_found+=1;
 		printf(ERR_EXTRA_OPERAND,data.line_pos);
@@ -762,7 +760,7 @@ void parse_operation_type3(parsing_globals data,char* command, int index)
 
 	/*local handling*/
 	newitem=(opcode_node *   *)malloc(sizeof(opcode_node * ));
-	if(newitem==NULL)/*Check if memory error*/
+	if(newitem==NULL)/*Check if memory error encountered*/
 	{
 		printf(ERR_MEMORY_LOCATION_FAILURE,data.line_pos);
 		exit(1);
@@ -804,7 +802,7 @@ void instruction_parse(parsing_globals data,char* label, char* command)
 		data.errors_found+=1;
 		return;
 	}
-	while(*command!= ' ' && *command != '\n' && *command!= '\t') /*Read till hit a space or EOL to get the instruction*/
+	while(*command!= ' ' && *command != '\n' && *command!= '\t') /*search for instruction till space or EOL encountered*/
 	{
 		instruction=(char *)realloc(instruction,(instructionIndex+1)*sizeof(char));
 		instruction[instructionIndex-1]=*command++;
@@ -832,7 +830,7 @@ void instruction_parse(parsing_globals data,char* label, char* command)
 					parse_extern_inst(data,command,instruction);
 				}
 				else
-					printf(ERR_INVALID_INSTRUCTION,data.line_pos); /*instruction is not defined in the language*/
+					printf(ERR_INVALID_INSTRUCTION,data.line_pos); /*illegal instruction encountered*/
 	}
 }
 
@@ -841,7 +839,7 @@ void add_data_to_ocode_table(parsing_globals data,char *label,char *instruction,
 	opcode_node * newitem=NULL;
 
 	newitem=(opcode_node *   *)malloc(sizeof(opcode_node * ));
-	if(newitem==NULL)/*Check if memory error*/
+	if(newitem==NULL)/*Check if memory error encountered*/
 	{
 		printf(ERR_MEMORY_LOCATION_FAILURE,data.line_pos);
 		exit(1);
@@ -873,7 +871,7 @@ void parse_data_inst(parsing_globals data,char *command,char * instruction,char 
 			data.errors_found++;
 			return;
 		}
-		/*if label exist - insert it to the symbol table*/
+		/*if label exists - insert into the symbol table*/
 		if(label!=NULL)
 		{
 			add_symbol(data.symbol_table,label,data.DC,DATA,LOCAL);
@@ -884,7 +882,7 @@ void parse_data_inst(parsing_globals data,char *command,char * instruction,char 
 				isMinus=1;
 			command++;
 		}
-		/*validating each argument and copy it to send it to the data table*/
+		/*validating each argument and copying it for sending to the data table*/
 		while(*command>='0' && *command<='9')
 		{
 			arg=(char *)realloc(arg,(argLen+1)*sizeof(char));
@@ -898,7 +896,7 @@ void parse_data_inst(parsing_globals data,char *command,char * instruction,char 
 			data.errors_found++;
 			return;
 		}
-		/*create int presentation of the current argument*/
+		/*create integer presentation of the current argument*/
 		temp=atoi(arg);
 		if(isMinus)
 		{
@@ -908,7 +906,7 @@ void parse_data_inst(parsing_globals data,char *command,char * instruction,char 
 		binaryArg=ConvertDecToOther(temp,2,0);
 		InsertDataToAssemblyTable(label,instruction,arg,binaryArg);
 
-		/*check if the numbers are seperated by ','*/
+		/*check if the numbers are separated by ','*/
 		while(isspace(temp=*command++)); /*Skip white-spaces*/
 		command--;
 		if(*command==',')
@@ -936,12 +934,12 @@ void parse_string_inst(parsing_globals data,char *command,char * instruction,cha
 		data.errors_found++;
 		return;
 	}
-	/*if label exist - insert it to the symbol table*/
+	/*if label exists - insert it into the symbol table*/
 	if(label!=NULL)
 	{
 		add_symbol(data.symbol_table,label,data.DC,DATA,LOCAL);
 	}
-	/*checking the validation of the string argument and send it to the data table*/
+	/*checking the validation of the string argument and sending it to the data table*/
 	if(*command!='"')
 	{
 		printf(ERR_INVALID_DATA_MEMBER,data.line_pos);
@@ -958,7 +956,7 @@ void parse_string_inst(parsing_globals data,char *command,char * instruction,cha
 		binaryArg=ConvertDecToOther(temp,2,0);
 		InsertDataToAssemblyTable(label,instruction,arg,binaryArg);
 	}
-	/*after sending all the characters insert a null parameter*/
+	/*all characters sent - insert a null parameter*/
 	if((*command++)=='"')
 	{
 		InsertDataToAssemblyTable(label,instruction,NULL,0);
@@ -970,7 +968,7 @@ void parse_string_inst(parsing_globals data,char *command,char * instruction,cha
 	}
 	while(isspace(temp=*command++)); /*Skip white-spaces*/
 	command--;
-	/*only one string should apearin each instruction*/
+	/*only one string should be present in each instruction*/
 	if(*command!='\0')
 	{
 		printf(ERR_INVALID_INSTRUCTION_SYNTAX,data.line_pos);

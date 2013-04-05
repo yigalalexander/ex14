@@ -21,9 +21,9 @@ typedef struct {
 
 typedef struct opn {
 	int addr; /*Decimal opcode address*/
-	char * command; /*command as was read from the file*/
-	char *label; /* labels as was read from the files*/
-	char * arguments; /*its arguments*/
+	char * command; /*command that was received from the file*/
+	char *label; /* label that was received from the files*/
+	char * arguments; /*arguments*/
 	opcode_bits bits; /*bits of information*/
 	char * base2code; /* code in binary */
 	char * base4code; /* code in base 4 */

@@ -32,7 +32,7 @@ symbol_list * new_symbol_list()
 {
 	symbol_list *temp;
 	temp=malloc(sizeof(symbol_list));
-	if(temp==NULL)/*Check if memory error*/
+	if(temp==NULL)/*Check if memory error encountered*/
 	{
 		printf(ERR_MEMORY_LOCATION_FAILURE,line_pos);
 		exit(1);
@@ -43,16 +43,16 @@ symbol_list * new_symbol_list()
 	return (temp);
 }
 
-int symbol_exists_in (symbol_list * list, char * symbol) /*check if 'symbol' exists in 'list' and returns the address of it, or 0*/
+int symbol_exists_in (symbol_list * list, char * symbol) /*checks if 'symbol' exists in 'list' and returns the address of it, or 0*/
 {
 	symbol_node * curr;
 	curr=list->head;
 	while (curr!=NULL)
 		if ((strcmp(symbol,curr->name))==0)
-			return (curr->addr); /*if symbol maches return address*/
-		else curr=curr->next;/* iterate through list*/
+			return (curr->addr); /*if symbol matches the return address*/
+		else curr=curr->next;/*iterate through the list*/
 	return (0);
-	/*made it to NULL pointer return 0*/
+	/*end of list reached - return 0*/
 }
 
 int add_symbol (symbol_list * list, char * symbol, int address,symbol_type sym_type,symbol_location sym_loc) /*add a new symbol with a name and an address*/
@@ -159,7 +159,7 @@ int flush_symbols(symbol_list *list)
 		{
 			curr=list->head;
 			fc=0;
-			while (curr!=NULL)/* interate through list*/
+			while (curr!=NULL)/* Iterate through list*/
 			{
 				to_clear=curr;/*free node by node*/
 				curr=curr->next;/*careful not to free a NULL, use also count variable*/
@@ -169,5 +169,5 @@ int flush_symbols(symbol_list *list)
 		}
 		free(list);/*free list pointer*/
 		return (1);
-	} else return (0); /*flush failed, nothing to fail*/
+	} else return (0); /*flush failed, nothing to flush*/
 }

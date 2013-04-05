@@ -13,7 +13,8 @@
 #include <stdio.h>
 #include <string.h>
 
-void string2upper(char* str)/*Convert a string to all upper characters*/
+/*characters are converted to upper case*/
+void string2upper(char* str)
 
 {
 	int i=0;
