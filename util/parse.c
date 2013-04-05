@@ -43,7 +43,7 @@ void first_pass(FILE input, parsing_globals data)
 		if((i+=IsSymbolExist(line+i,&label))==-1)
 		{
 			data.errors_found+=1;
-			printf(ERR_INVALID_SYMBOL,addressing_validate_match()); /*    <<<<<<<<<<<<<<------------ needs attention */
+			printf(ERR_INVALID_SYMBOL,addressing_validate_match(data)); /*    <<<<<<<<<<<<<<------------ needs attention */
 		}
 		else
 		{
@@ -61,7 +61,8 @@ void first_pass(FILE input, parsing_globals data)
 
 
 
-int read_line(FILE *INPUT_PROGRAM, char *line) {
+int read_line(FILE *INPUT_PROGRAM, char *line)
+{
 	char c = '\0';
 	int index = 0;
 	while ((c = getc(INPUT_PROGRAM)) != EOF && c != '\n') {
@@ -565,7 +566,7 @@ void update_tbl_addr(parsing_globals data) /*update_tbl_addr*/
 	}
 
 }
-/*****************************/
+
 int determine_operation_type(char* str,int *index)
 {
 	int i;

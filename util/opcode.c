@@ -40,7 +40,7 @@ opcode_node *new_opcode_node()
 {
 	opcode_node * temp;
 	temp=malloc(sizeof(opcode_node));
-	if(temp==NULL)/*Check if memory error*/
+	if(temp==NULL)/*Checks if memory allocation error is encountered*/
 	{
 		printf(ERR_MEMORY_LOCATION_FAILURE,line_pos);
 		exit(1);
@@ -53,7 +53,7 @@ opcode_list *new_opcode_list(int start_addr)
 {
 	opcode_list * temp;
 	temp=malloc(sizeof(opcode_list));
-	if(temp==NULL)/*Check if memory error*/
+	if(temp==NULL)/*Checks if memory allocation error is encountered*/
 	{
 		printf(ERR_MEMORY_LOCATION_FAILURE,line_pos);
 		exit(1);
@@ -69,9 +69,9 @@ void add_opcode(opcode_list *list, opcode_node * new_item)
 {
 	opcode_node *temp;
 
-	if(!(list->head)) /*if this is an empty list*/
+	if(!(list->head)) /*if list is empty*/
 		list->head = new_item;
-	else /* not empty, find the last node and add to it */
+	else /* if not empty, find the last node and add a new one to the list */
 	{
 		temp=(list->head);
 		while(temp->next)
@@ -92,32 +92,32 @@ opcode_node *get_opcode_by_addr(opcode_list *list, int addr)
 			curr=curr->next; /*advance to where the relevant opcode is*/
 		if (curr!=NULL) /*if it not the end of the list*/
 			return (curr);
-		else return (NULL); /*otherwise it was not found*/
+		else return (NULL); /*otherwise opcode was not found*/
 	}
-	else return (NULL); /*failed retrieve*/
+	else return (NULL); /*opcode retrieve failed*/
 }
 
 int flush_opcode_list(opcode_list *list)
 {
 	opcode_node *curr, *to_clear;
-	int fc; /*free count*/
+	int fc; /*free counter*/
 	if (list!=NULL)
 	{
-		if (!IS_EMPTY(list)) /* not an empty list*/
+		if (!IS_EMPTY(list))
 		{
 			curr=list->head;
 			fc=0;
-			while (curr!=NULL)/* interate through list*/
+			while (curr!=NULL)/*iterate through list*/
 			{
-				to_clear=curr;/*free node by node*/
-				curr=curr->next;/*careful not to free a NULL, use also count variable*/
-				free(to_clear);
+				to_clear=curr;/*flushes node by node*/
+				curr=curr->next;
+				free(to_clear);/*making sure NULL is not flushed*/
 				fc++;
 			}
 		} 
-		free(list);/*free list pointer*/
+		free(list);/*flush list pointer*/
 		return (1);
-	} else return (0); /*flush failed, nothing to fail*/
+	} else return (0); /*flush failed or nothing to flush*/
 }
 
 

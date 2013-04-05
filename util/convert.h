@@ -10,9 +10,9 @@
 #define CONVERT_H_
 
 char * int2other(int num,int base); /*converts an int to other base number as a string */
-int bits2int (opcode_bits bit); /*converts the bits field from an opcode to an int*/
+int bits2int (opcode_bits bit); /*converts the bit-field from an opcode struct to int*/
 int bin2int(char *binArr); /*converts a binary string to integer*/
-opcode_bits int2bits (int num); /*converts an int to the opcode bits*/
-void string2upper(char* str); /*Convert a string to all upper characters*/
+opcode_bits int2bits (int num); /*converts int to the opcode bits*/
+void string2upper(char* str); /*Convert all characters in the string to upper case*/
 
 #endif /* CONVERT_H_ */

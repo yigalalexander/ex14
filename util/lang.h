@@ -35,7 +35,7 @@ typedef struct{
 	int AllowdMethodsDest[5];
 } command_methods;
 
-static command_methods methods[]= /*allowed source and destination methods*/
+static command_methods methods[]= /*legal source and destination methods*/
 {
 		{"MOV",{1,1,1,1,1},{1,1,1,1,1}},
 		{"CMP",{1,1,1,1,1},{1,1,1,1,1}},
@@ -57,7 +57,7 @@ static command_methods methods[]= /*allowed source and destination methods*/
 
 #define ERR_MEMORY_LOCATION_FAILURE "Error: Cannot allocate memory - exiting program, occured in line %d \n"
 
-/*File errors*/
+/*File manipulation related errors*/
 #define ERR_FILE_MISSING_OPERAND "Error: No parameters were expected - exiting program \n"
 #define ERR_FAILED_TO_OPEN_FILE "Error: Failed to open file - exiting program \n"
 
@@ -79,7 +79,7 @@ static command_methods methods[]= /*allowed source and destination methods*/
 #define ERR_MISSING_DATA_MEMBERS "Error: Missing parameters after the data instruction, in line %d"
 #define ERR_INVALID_INSTRUCTION_SYNTAX "Error: A syntax error was found, in line %d"
 
-/*Symbol error*/
+/*Symbol errors*/
 #define ERR_DUPLICATE_SYMBOL "Error: Symbol in line %d already exists\n "
 #define ERR_SYMBOL_NOT_EXIST "Error: Symbol in line %d doesn't exists not in the code nor the data\n "
 #define ERR_SYMBOL_NOT_EXIST_NAME "Error: Symbol not defined in line %d\n "
