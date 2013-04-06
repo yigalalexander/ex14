@@ -27,7 +27,7 @@ typedef struct opn {
 	opcode_bits bits; /*bits of information*/
 	char * base2code; /* code in binary */
 	char * base4code; /* code in base 4 */
-	struct symbol_location location; /*location of this record*/
+	symbol_location location; /*location of this record*/
 	char mark; /*type of command*/
 	struct opn *next;
 } opcode_node;
