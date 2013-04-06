@@ -15,6 +15,8 @@
 #define OPER1_LENGTH 5
 #define OPER2_LENGTH 9
 #define OPER3_LENGTH 2
+#define MAX_LABEL_LENGTH 30
+#define MAX_LINE_LENGTH 80
 
 #define DATA_INSTRUCTION "data"
 #define STRING_INSTRUCTION "string"
@@ -55,7 +57,8 @@ static command_methods methods[]= /*legal source and destination methods*/
 		{"STOP",{0,0,0,0,0},{0,0,0,0,0}}
 };
 
-#define ERR_MEMORY_LOCATION_FAILURE "Error: Cannot allocate memory - exiting program, occured in line %d \n"
+#define ERR_MEMORY_ALLOCATION_FAILURE "Error: Cannot allocate memory - exiting program, occurred in line %d \n"
+#define ERR_MEMORY_ALLOCATION_GEN "Error: Cannot allocate memory - exiting program"
 
 /*File manipulation related errors*/
 #define ERR_FILE_MISSING_OPERAND "Error: No parameters were expected - exiting program \n"

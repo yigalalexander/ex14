@@ -22,7 +22,7 @@ void first_pass(FILE input, parsing_globals data)
 
 	int i,temp,len;
 	char *label=NULL;
-	char line[80];/*line of text that will be read*/
+	char line[MAX_LINE_LENGTH];/*line of text that will be read*/
 	int isEOF=0;
 	do
 	{
@@ -205,7 +205,7 @@ addr_methods type_of_addressing(parsing_globals data,char *lbl,char **externalLb
 	for(i=0;lbl[i]!='\0' && lbl[i]!='[';i++) /*is it 1,2 or 3? */
 		temp[i]=lbl[i];
 	temp[i]='\0';
-	j=IsValidLabel(temp,externalLbl);
+	j=is_valid_label(temp,externalLbl);
 	if(externalLbl==NULL)
 	{
 		printf(ERR_INVALID_LABEL,data.line_pos);
@@ -230,7 +230,7 @@ addr_methods type_of_addressing(parsing_globals data,char *lbl,char **externalLb
 		}
 		if(temp[0]=='*')/*if Offset method*/
 		{
-			if(IsValidLabel(temp+1,internalLbl1)==-1)
+			if(is_valid_label(temp+1,internalLbl1)==-1)
 			{
 				printf(ERR_INVALID_LABEL,data.line_pos);
 				data.errors_found++;
@@ -239,7 +239,7 @@ addr_methods type_of_addressing(parsing_globals data,char *lbl,char **externalLb
 		}
 		else
 		{
-			if(IsValidLabel(temp,internalLbl1)==-1)
+			if(is_valid_label(temp,internalLbl1)==-1)
 			{
 				printf(ERR_INVALID_LABEL,data.line_pos);
 				data.errors_found++;
@@ -369,7 +369,7 @@ void validate_addr_add_table(parsing_globals data,int index, char* lblSource, ch
 	machineCode=(char *)malloc(17*sizeof(char));
 	if(machineCode==NULL)
 	{
-		printf(ERR_MEMORY_LOCATION_FAILURE,data.line_pos);
+		printf(ERR_MEMORY_ALLOCATION_FAILURE,data.line_pos);
 		data.errors_found+=1;
 		exit(1);
 	}
@@ -425,7 +425,7 @@ void validate_addr_add_table(parsing_globals data,int index, char* lblSource, ch
 	newitem=(opcode_node  *)malloc(sizeof(opcode_node));
 	if(newitem==NULL)/*Check if memory error*/
 	{
-		printf(ERR_MEMORY_LOCATION_FAILURE,data.line_pos);
+		printf(ERR_MEMORY_ALLOCATION_FAILURE,data.line_pos);
 		exit(1);
 	}
 
@@ -436,7 +436,7 @@ void validate_addr_add_table(parsing_globals data,int index, char* lblSource, ch
 		temp=(char *)malloc((strlen(methods[index+OPER1_LENGTH].commandName)+1)*sizeof(char));/*for Operation type 2 set the command acoording to index+ operation1 length*/
 	if(!temp) /*for malloc allocation error exit program*/
 	{
-		printf(ERR_MEMORY_LOCATION_FAILURE,data.line_pos);
+		printf(ERR_MEMORY_ALLOCATION_FAILURE,data.line_pos);
 		exit(1);
 	}
 	if(operationType==1)
@@ -491,7 +491,7 @@ void handle_rest_of_labels(parsing_globals data,addr_methods type,char * exteran
 		newitem=(opcode_node *)malloc(sizeof(opcode_node));
 		if(newitem==NULL)/*Check if memory error*/
 		{
-			printf(ERR_MEMORY_LOCATION_FAILURE,data.line_pos);
+			printf(ERR_MEMORY_ALLOCATION_FAILURE,data.line_pos);
 			exit(1);
 		}
 		newitem->label=NULL;
@@ -683,7 +683,7 @@ void parse_operation_type1(parsing_globals data,char* command, int index)
 		secondOper=(char *)realloc(secondOper, (i+1)*sizeof(char));
 		if(secondOper==NULL)
 		{
-			printf(ERR_MEMORY_LOCATION_FAILURE,data.line_pos);
+			printf(ERR_MEMORY_ALLOCATION_FAILURE,data.line_pos);
 			exit(1);
 		}
 		secondOper[i++]=*command++;
@@ -691,7 +691,7 @@ void parse_operation_type1(parsing_globals data,char* command, int index)
 	secondOper=(char *)realloc(secondOper, (i+1)*sizeof(char));
 	if(secondOper==NULL)
 	{
-		printf(ERR_MEMORY_LOCATION_FAILURE,data.line_pos);
+		printf(ERR_MEMORY_ALLOCATION_FAILURE,data.line_pos);
 	}
 	secondOper[i]='\0';
 	while(isspace(temp=*command++)); /*Skip white-spaces*/
@@ -765,7 +765,7 @@ void parse_operation_type3(parsing_globals data,char* command, int index)
 	newitem=(opcode_node *   *)malloc(sizeof(opcode_node * ));
 	if(newitem==NULL)/*Check if memory error*/
 	{
-		printf(ERR_MEMORY_LOCATION_FAILURE,data.line_pos);
+		printf(ERR_MEMORY_ALLOCATION_FAILURE,data.line_pos);
 		exit(1);
 	}
 	newitem->label=data.first_label;
@@ -844,7 +844,7 @@ void add_data_to_ocode_table(parsing_globals data,char *label,char *instruction,
 	newitem=(opcode_node *   *)malloc(sizeof(opcode_node * ));
 	if(newitem==NULL)/*Check if memory error*/
 	{
-		printf(ERR_MEMORY_LOCATION_FAILURE,data.line_pos);
+		printf(ERR_MEMORY_ALLOCATION_FAILURE,data.line_pos);
 		exit(1);
 	}
 	(newitem)->label=label;
@@ -985,7 +985,7 @@ void parse_extern_inst(parsing_globals data,char *command,char * instruction)
 {
 	char *externLbl=NULL;
 
-	if(IsValidLabel(command,&externLbl)!=-1)
+	if(is_valid_label(command,&externLbl)!=-1)
 	{
 		add_symbol(data.symbol_table,externLbl,0,DATA,EXTERN);
 		data.DC++;
@@ -1002,7 +1002,7 @@ void parse_extern_inst(parsing_globals data,char *command,char * instruction)
 void parse_enrty_inst(parsing_globals data,char *command,char * instruction)
 {
 	char *entryLbl=NULL;
-	if(IsValidLabel(command,&entryLbl)!=-1)
+	if(is_valid_label(command,&entryLbl)!=-1)
 	{
 		add_symbol(data.symbol_table,entryLbl,0,CODE,ENTRY);
 	}
@@ -1014,7 +1014,7 @@ void parse_enrty_inst(parsing_globals data,char *command,char * instruction)
 	}
 }
 
-int IsValidLabel(parsing_globals data,char *command, char **label)
+int is_valid_label(parsing_globals data,char *command, char **label)
 {
 	int temp, labelLen=1,index=0;
 	while(isspace(temp=command[index++])); /*Skip white-spaces*/
@@ -1062,7 +1062,7 @@ void  init_globals(parsing_globals this)
 	this.code_table=NULL;
 	this.symbol_table=NULL;
 	this.errors_found=0;
-	this.IC=100;
+	this.IC=INITIAL_ADDRESS;
 	this.DC=0;
 	this.line_pos=0;
 }

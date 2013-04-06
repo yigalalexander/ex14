@@ -28,7 +28,7 @@ typedef struct {
 void init_globals(parsing_globals this);
 int read_line(FILE *INPUT_PROGRAM, char *line);
 
-void first_pass(FILE input,parsing_globals data); /*add parameters here!*/
+void first_pass(FILE * input,parsing_globals data); /*add parameters here!*/
 void second_pass(parsing_globals data); /*add parameters here!*/
 void update_tbl_addr(parsing_globals data); /*update the table addresses after both passes */
 

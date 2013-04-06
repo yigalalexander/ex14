@@ -24,7 +24,7 @@ void write_object_file(char *fname, opcode_list * oplist)
 
 	target_file = (char *) malloc((strlen(fname) + 5) * sizeof(char));
 	if (target_file == NULL ) {
-		printf(ERR_MEMORY_LOCATION_FAILURE, line_pos);
+		printf(ERR_MEMORY_ALLOCATION_GEN);
 		exit(1);
 	}
 	strcpy(target_file, fname);
@@ -66,7 +66,7 @@ void write_extern_file(char* fname, symbol_list * list)
 
 	target_file = (char *) malloc((strlen(fname) + 5) * sizeof(char));
 	if (target_file == NULL ) {
-		printf(ERR_MEMORY_LOCATION_FAILURE, line_pos);
+		printf(ERR_MEMORY_ALLOCATION_GEN);
 		exit(1);
 	}
 	strcpy(target_file, fname);
@@ -99,7 +99,7 @@ void write_entry_file(char* fname, symbol_list * list)
 
 	target_file = (char *) malloc((strlen(fname) + 5) * sizeof(char));
 	if (target_file == NULL ) {
-		printf(ERR_MEMORY_LOCATION_FAILURE, line_pos);
+		printf(ERR_MEMORY_ALLOCATION_GEN);
 		exit(1);
 	}
 	strcpy(target_file, fname);

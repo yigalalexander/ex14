@@ -8,6 +8,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include "lang.h"
+#include "symbol.h"
 
 #define IS_EMPTY(X) ((X->count==0)?1:0)
 
@@ -23,10 +24,16 @@ typedef struct {
 } opcode_bits;
 
 typedef struct opn {
-	int addr; /*opcode address*/
-	opcode_bits bits; /*bits of information*/
-	int flag; /*type of command*/
-	struct opn *next;
+	int addr; /*Decimal opcode address*/
+		char * command; /*command that was received from the file*/
+		char *label; /* label that was received from the files*/
+		char * arguments; /*arguments*/
+		opcode_bits bits; /*bits of information*/
+		char * base2code; /* code in binary */
+		char * base4code; /* code in base 4 */
+		symbol_location location; /*location of this record*/
+		char mark; /*type of command*/
+		struct opn *next;
 } opcode_node;
 
 typedef struct opl {
@@ -42,7 +49,7 @@ opcode_node *new_opcode_node()
 	temp=malloc(sizeof(opcode_node));
 	if(temp==NULL)/*Checks if memory allocation error is encountered*/
 	{
-		printf(ERR_MEMORY_LOCATION_FAILURE,line_pos);
+		printf(ERR_MEMORY_ALLOCATION_GEN);
 		exit(1);
 	}
 	temp->next=NULL;
@@ -55,7 +62,7 @@ opcode_list *new_opcode_list(int start_addr)
 	temp=malloc(sizeof(opcode_list));
 	if(temp==NULL)/*Checks if memory allocation error is encountered*/
 	{
-		printf(ERR_MEMORY_LOCATION_FAILURE,line_pos);
+		printf(ERR_MEMORY_ALLOCATION_GEN);
 		exit(1);
 	}
 	temp->count=0;

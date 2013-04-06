@@ -7,6 +7,7 @@
 #include "convert.h"
 #include "lang.h"
 #include "parse.h"
+#include "asoutput.h"
 
 
 int main(int argc, const char * argv[])
@@ -25,7 +26,7 @@ int main(int argc, const char * argv[])
 	fname=(char *)malloc((strlen(argv[1])+3)*sizeof(char));
 	if(fname==NULL)
 	{
-		printf(ERR_MEMORY_LOCATION_FAILURE,0);
+		printf(ERR_MEMORY_ALLOCATION_FAILURE,0);
 		exit(1);
 	}
 
@@ -55,7 +56,7 @@ int main(int argc, const char * argv[])
 			second_pass(session);
 			if(!(session.errors_found))
 			{
-				write_object_file(argv[i],session.code_table);
+				write_object_file((argv[i]),session.code_table);
 				write_extern_file(argv[i],session.symbol_table);
 				write_entry_file(argv[i],session.symbol_table);
 			}
