@@ -17,7 +17,7 @@ typedef struct {
 	char * first_label;
 } parsing_globals;
 
-/*
+/* d
  * Receives an input files to run the first parsing pass over the file
  * @input - input file, must be opened
  * @target - opcode table
