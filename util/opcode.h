@@ -7,6 +7,7 @@
 
 #ifndef OPCODE_H_
 #define OPCODE_H_
+#include "symbol.h"
 
 typedef struct {
 	unsigned int comb:2;

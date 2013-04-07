@@ -36,7 +36,7 @@ void write_object_file(char *fname, opcode_list * oplist)
 			fputs("\t", ASSEMBLY_TABLE);
 			fputs(int2other(temp->addr,4), ASSEMBLY_TABLE);
 			fputs("\t", ASSEMBLY_TABLE);
-			fputs( int2other( bits2int(temp->bits),4 ), ASSEMBLY_TABLE);
+			fputs(temp->base4code, ASSEMBLY_TABLE);
 			fprintf(ASSEMBLY_TABLE, "\t%c\n", temp->mark);
 		}
 		temp = temp->next;
@@ -47,7 +47,7 @@ void write_object_file(char *fname, opcode_list * oplist)
 			fputs("\t", ASSEMBLY_TABLE);
 			fputs(int2other(temp->addr,4), ASSEMBLY_TABLE);
 			fputs("\t", ASSEMBLY_TABLE);
-			fputs( int2other( bits2int(temp->bits),4 ), ASSEMBLY_TABLE);
+			fputs( temp->base4code, ASSEMBLY_TABLE);
 			fprintf(ASSEMBLY_TABLE, "\t%c\n", temp->mark);
 		}
 		temp = temp->next;
@@ -81,7 +81,7 @@ void write_extern_file(char* fname, symbol_list * list)
 			fputs("\t", TARGET);
 			fputs(curr->name, TARGET);
 			fputs("\t", TARGET);
-			fputs(int2other(curr->dec_value), TARGET);
+			fputs(int2other(curr->dec_value,4), TARGET);
 			fprintf(TARGET, "\n");
 		}
 		curr = curr->next;
@@ -114,7 +114,7 @@ void write_entry_file(char* fname, symbol_list * list)
 			fputs("\t", TARGET);
 			fputs(curr->name, TARGET);
 			fputs("\t", TARGET);
-			fputs(int2other(curr->dec_value), TARGET);
+			fputs(int2other(curr->dec_value,4), TARGET);
 			fprintf(TARGET, "\n");
 		}
 		curr = curr->next;
