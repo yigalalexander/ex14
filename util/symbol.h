@@ -27,12 +27,12 @@ typedef struct symbol {
 	char * base4_value;
 	symbol_location location; /* where does it belong */
 	symbol_type type;
-	struct symbol *next;
+	symbol_node * next;
 } symbol_node;
 
 typedef struct sym_list {
-	symbol_node *head;
-	symbol_node *tail;
+	symbol_node * head;
+	symbol_node * tail;
 	int count;
 } symbol_list;
 

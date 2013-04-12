@@ -57,6 +57,10 @@ static command_methods methods[]= /*legal source and destination methods*/
 		{"STOP",{0,0,0,0,0},{0,0,0,0,0}}
 };
 
+static char* OperationType1[OPER1_LENGTH]={"MOV", "CMP", "ADD", "SUB", "LEA"};
+static char* OperationType2[OPER2_LENGTH]={"INC", "DEC", "JMP", "BNE", "RED", "PRN", "JSR", "CLR","NOT"};
+static char* OperationType3[OPER3_LENGTH]={"RTS", "STOP"};
+
 #define ERR_MEMORY_ALLOCATION_FAILURE "Error: Cannot allocate memory - exiting program, occurred in line %d \n"
 #define ERR_MEMORY_ALLOCATION_GEN "Error: Cannot allocate memory - exiting program"
 

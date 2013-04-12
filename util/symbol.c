@@ -9,7 +9,7 @@
 #include <stdio.h>
 #include <string.h>
 #include "lang.h"
-#include "parse.h"
+
 
 #define IS_EMPTY(X) ((X->count==0)?1:0)
 
@@ -20,8 +20,9 @@ typedef struct symbol {
 	char * base4_value;
 	symbol_location location; /* where does it belong */
 	symbol_type type;
-	struct symbol *next;
+	symbol_node *next;
 } symbol_node;
+
 
 typedef struct sym_list {
 	symbol_node *head;

@@ -9,55 +9,58 @@
 #include <string.h>
 #include <ctype.h>
 #include "lang.h"
-#include "opcode.h"
+#include "data_st.h"
 #include "convert.h"
-#include "symbol.h"
 
 
 
-void first_pass(FILE input, parsing_globals data)
+typedef struct {
+	opcode_list * code_table;
+	symbol_list * symbol_table;
+	int line_pos, errors_found,IC,DC;
+	char * first_label;
+} parsing_globals;
+
+int symbol_exists(parsing_globals data,char *c, char **label)
 {
-  /* get line*/
-	/* Is it: A symbol, Pseudo instruction,*/
-
-	int i,temp,len;
-	char *label=NULL;
-	char line[MAX_LINE_LENGTH];/*line of text that will be read*/
-	int isEOF=0;
-	do
+	int i=1,index;
+	char *tempPointer=c,*tempLbl=NULL;
+	if(((*c>='a') && (*c<='z')) || ((*c>='A') && (*c<='Z')))
 	{
-		label=NULL;
-		isEOF=read_line(input,line);
-		/*is it an empty or a comment line?*/
-		len=strlen(line);
-		for(i=0;i<len && (temp=isspace(line[i])) ; i++);
-		if(i==strlen(line)) /*Empty line*/
+		while(((tempPointer[i-1]>='a') && (tempPointer[i-1]<='z')) || ((tempPointer[i-1]>='A') && (tempPointer[i-1]<='Z')) || ((tempPointer[i-1]>='0') && (tempPointer[i-1]<='9')))
 		{
-			continue;
+			tempLbl=(char *)realloc(tempLbl,(i+1)*sizeof(char));
+			tempLbl[i-1]=tempPointer[i-1];
+			i++;
 		}
-		if(line[i]==';') /*Comment line*/
+		tempLbl[i-1]='\0';
+		if(tempPointer[i-1]!=':') /*not a label*/
 		{
-			continue;
+			label=NULL;
+			return 0;
 		}
-		/*check if the first word is a symbol*/
-		if((i+=IsSymbolExist(line+i,&label))==-1)
+		else /*found a label*/
 		{
-			data.errors_found+=1;
-			printf(ERR_INVALID_SYMBOL,addressing_validate_match(data)); /*    <<<<<<<<<<<<<<------------ needs attention */
+			if(i< MAX_LABEL_LENGTH )
+			{
+				if(((i == 3 ) && tempLbl[0] == 'r'  && tempLbl[1]>='0' && tempLbl[1]<='7' && tempLbl[2]=='\0') || (determine_operation_type(tempLbl,&index)!=0))/*Check if valid instruction or register*/
+				{
+					data.errors_found+=1;
+					printf(ERR_INVALID_SYMBOL,data.line_pos);
+					return -1;
+				}
+				*label=tempLbl;
+				return i;/*Return index after ':'*/
+			}
+			return -1;
 		}
-		else
-		{
-			while(isspace(temp=line[i++])); /*Skip white-spaces*/
-			i--;
-			if(line[i]=='.')/*Check if contains instruction*/
-				instruction_parse(data.code_table,data.symbol_table,label,line+i);
-			else
-				general_operation_parse(data.code_table,data.symbol_table,label,line+i);
-
-		}
-		data.line_pos++;
-	}while(!isEOF);
+	}
+	label=NULL;
+	return 0;
 }
+
+
+
 
 
 
@@ -75,54 +78,7 @@ int read_line(FILE *INPUT_PROGRAM, char *line)
 		return (0);
 }
 
-void second_pass(parsing_globals data)
-{
 
-	opcode_node * dest_op_node;
-	opcode_node * temp=data.code_table->head;
-	symbol_node * temp_sym=data.symbol_table->head;
-
-	while(temp)
-	{
-		/*temp->=int2other(temp->addr,4); ----- OLD line */
-		if(temp->base4code !=NULL && !(strcmp(temp->base4code,"?")))/*Check if need to update the address*/
-		{
-			if((temp_sym=symbol_exists_in(data.symbol_table,temp->base2code)))
-			{
-				if(temp_sym->location==EXTERN)/*Enter '0' to Binary machine code*/
-				{
-					temp->base2code= int2other(0,2,0);
-					temp->mark='e';
-					if(temp_sym->dec_value==0)
-						temp_sym->dec_value=temp->addr;
-					temp_sym->base4_value = int2other(temp_sym->dec_value,4);
-				}
-				else
-				{
-					/*Check if need the the distance label or the address*/
-					if(temp->arguments!=NULL && !(strcmp(temp->arguments,"*")))/*Indicates that it is "distance label"*/
-					{
-						while(dest_op_node && dest_op_node->addr!=temp_sym->dec_value)
-							dest_op_node=dest_op_node->next;
-						temp->base2code= dest_op_node->base2code;
-					}
-					else
-					{
-						temp->base2code = int2other(temp_sym->dec_value,2);
-					}
-
-				}
-			}
-			else
-			{
-				data.errors_found+=1;
-				printf(ERR_SYMBOL_NOT_EXIST_NAME ,data.line_pos);
-			}
-		}
-		temp->base4code=int2other(bin2int(temp->base2code),4);
-		temp=temp->next;
-	}
-}
 
 
 char* is_valid_number(parsing_globals data,char *string)
@@ -149,13 +105,13 @@ char* is_valid_number(parsing_globals data,char *string)
 		temp=strlen(string);
 		for(i=1;i<temp;i++)
 			sum=sum*10+(string[i]-'0');
-		string=int2other(sum,2,0);
+		string=int2other(sum,2);
 		temp=strlen(string);
 		for(i=0;i<temp;i++)
 			string[i]=((string[i]-'0')^1)+'0';
 		temp=bin2int(string);
 		temp+=1;
-		string=int2other(temp,2,0);
+		string=int2other(temp,2);
 		temp=strlen(string);
 		fourNum= (char *)malloc(17*sizeof(char));
 		for(i=0;i<16;i++)
@@ -379,7 +335,7 @@ void validate_addr_add_table(parsing_globals data,int index, char* lblSource, ch
 	/*0-2 Dest reg*/
 	if(typeAddr2==DIRECT_REG_ADDR)/*Put in value only if register*/
 	{
-		temp=int2other(lblDest[1]-'0',2,0);
+		temp=int2other(lblDest[1]-'0',2);
 		len=strlen(temp);
 		for(i=len-1;i>=0;i--)
 			machineCode[i]=temp[j++];
@@ -387,7 +343,7 @@ void validate_addr_add_table(parsing_globals data,int index, char* lblSource, ch
 
 	/*3-5 Method of Dest addressing	*/
 	j=0;
-	temp=int2other(typeAddr2,2,0);
+	temp=int2other(typeAddr2,2);
 	len=strlen(temp);
 	for(i=2+len;i>=3;i--)
 		machineCode[i]=temp[j++];
@@ -398,14 +354,14 @@ void validate_addr_add_table(parsing_globals data,int index, char* lblSource, ch
 		if(typeAddr1==DIRECT_REG_ADDR)
 		{
 			j=0;
-			temp=int2other(lblSource[1]-'0',2,0);
+			temp=int2other(lblSource[1]-'0',2);
 			len=strlen(temp);
 			for(i=5+len;i>=6;i--)
 				machineCode[i]=temp[j++];
 		}
 		/*9-11 Method of Source addressing*/
 		j=0;
-		temp=int2other(typeAddr1,2,0);
+		temp=int2other(typeAddr1,2);
 		len=strlen(temp);
 		for(i=8+len;i>=9;i--)
 			machineCode[i]=temp[j++];
@@ -414,9 +370,9 @@ void validate_addr_add_table(parsing_globals data,int index, char* lblSource, ch
 	/*12-15 Operand Code*/
 	j=0;
 	if(operationType==1)
-		temp=int2other(index,2,0);
+		temp=int2other(index,2);
 	else if(operationType==2)
-		temp=int2other(index+OPER1_LENGTH,2,0);
+		temp=int2other(index+OPER1_LENGTH,2);
 	len=strlen(temp);
 	for(i=11+len;i>=12;i--)
 		machineCode[i]=temp[j++];
@@ -609,7 +565,7 @@ void general_operation_parse(parsing_globals data,char* label, char* Command)
 	}
 	cmdTemp=(char *)realloc(cmdTemp,(i+1)*sizeof(char));
 	cmdTemp[i]='\0';
-	ConvertToUpper(cmdTemp);
+	string2upper(cmdTemp);
 
 	data.first_label=label;
 	if(!(typeOfCommand=determine_operation_type(cmdTemp,&index)))
@@ -748,7 +704,7 @@ void parse_operation_type2(parsing_globals data,char* command, int index)
 
 void parse_operation_type3(parsing_globals data,char* command, int index)
 {
-	opcode_node *  *newitem=NULL;
+	opcode_node * newitem=NULL;
 	int i=0,temp,j=0;
 	char *numCmd=NULL;
 
@@ -762,7 +718,7 @@ void parse_operation_type3(parsing_globals data,char* command, int index)
 	}
 
 	/*local handling*/
-	newitem=(opcode_node *   *)malloc(sizeof(opcode_node * ));
+	newitem=(opcode_node *)malloc(sizeof(opcode_node));
 	if(newitem==NULL)/*Check if memory error*/
 	{
 		printf(ERR_MEMORY_ALLOCATION_FAILURE,data.line_pos);
@@ -906,8 +862,8 @@ void parse_data_inst(parsing_globals data,char *command,char * instruction,char 
 			temp=~temp;
 			temp+=1;
 		}
-		binaryArg=ConvertDecToOther(temp,2,0);
-		InsertDataToAssemblyTable(label,instruction,arg,binaryArg);
+		binaryArg=int2other(temp,2);
+		add_data_to_ocode_table(data,label,instruction,arg,binaryArg);
 
 		/*check if the numbers are seperated by ','*/
 		while(isspace(temp=*command++)); /*Skip white-spaces*/
@@ -956,7 +912,7 @@ void parse_string_inst(parsing_globals data,char *command,char * instruction,cha
 		arg[0]=*command++;
 		arg[1]='\0';
 		temp=(int)arg[0];
-		binaryArg=ConvertDecToOther(temp,2,0);
+		binaryArg=int2other(temp,2);
 		InsertDataToAssemblyTable(label,instruction,arg,binaryArg);
 	}
 	/*after sending all the characters insert a null parameter*/
@@ -1056,6 +1012,101 @@ int is_valid_label(parsing_globals data,char *command, char **label)
 	}
 	return index;
 }
+
+void first_pass(FILE * input, parsing_globals data)
+{
+  /* get line*/
+	/* Is it: A symbol, Pseudo instruction,*/
+
+	int i,temp,len;
+	char *label=NULL;
+	char line[MAX_LINE_LENGTH];/*line of text that will be read*/
+	int isEOF=0;
+	do
+	{
+		label=NULL;
+		isEOF=read_line(input,line);
+		/*is it an empty or a comment line?*/
+		len=strlen(line);
+		for(i=0;i<len && (temp=isspace(line[i])) ; i++);
+		if(i==strlen(line)) /*Empty line*/
+		{
+			continue;
+		}
+		if(line[i]==';') /*Comment line*/
+		{
+			continue;
+		}
+		/*check if the first word is a symbol*/
+		if((i+=symbol_exists(data,line+i,&label))==-1)
+		{
+			data.errors_found+=1;
+			printf(ERR_INVALID_SYMBOL,/*addressing_validate_match(data)*/0); /*    <<<<<<<<<<<<<<------------ needs attention */
+		}
+		else
+		{
+			while(isspace(temp=line[i++])); /*Skip white-spaces*/
+			i--;
+			if(line[i]=='.')/*Check if contains instruction*/
+				instruction_parse(data,label,line+i);
+			else
+				general_operation_parse(data,label,line+i);
+
+		}
+		data.line_pos++;
+	}while(!isEOF);
+}
+
+void second_pass(parsing_globals data)
+{
+
+	opcode_node * dest_op_node;
+	opcode_node * temp=data.code_table->head;
+	symbol_node * temp_sym=data.symbol_table->head;
+
+	while(temp)
+	{
+		/*temp->=int2other(temp->addr,4); ----- OLD line */
+		if(temp->base4code !=NULL && !(strcmp(temp->base4code,"?")))/*Check if need to update the address*/
+		{
+			if((temp_sym=symbol_exists_in(data.symbol_table,temp->base2code)))
+			{
+				if(temp_sym->location==EXTERN)/*Enter '0' to Binary machine code*/
+				{
+					temp->base2code= int2other(0,2);
+					temp->mark='e';
+					if(temp_sym->dec_value==0)
+						temp_sym->dec_value=temp->addr;
+					temp_sym->base4_value = int2other(temp_sym->dec_value,4);
+				}
+				else
+				{
+					/*Check if need the the distance label or the address*/
+					if(temp->arguments!=NULL && !(strcmp(temp->arguments,"*")))/*Indicates that it is "distance label"*/
+					{
+						while(dest_op_node && dest_op_node->addr!=temp_sym->dec_value)
+							dest_op_node=dest_op_node->next;
+						temp->base2code= dest_op_node->base2code;
+					}
+					else
+					{
+						temp->base2code = int2other(temp_sym->dec_value,2);
+					}
+
+				}
+			}
+			else
+			{
+				data.errors_found+=1;
+				printf(ERR_SYMBOL_NOT_EXIST_NAME ,data.line_pos);
+			}
+		}
+		temp->base4code=int2other(bin2int(temp->base2code),4);
+		temp=temp->next;
+	}
+}
+
+
 
 void  init_globals(parsing_globals this)
 {

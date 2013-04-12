@@ -10,7 +10,7 @@
 #ifndef PARSE_H_
 #define PARSE_H_
 
-typedef struct {
+typedef struct prsg{
 	opcode_list * code_table;
 	symbol_list * symbol_table;
 	int line_pos, errors_found,IC,DC;
@@ -34,6 +34,7 @@ void update_tbl_addr(parsing_globals data); /*update the table addresses after b
 
 char* is_valid_number(parsing_globals data,char *string);
 addr_methods type_of_addressing(char *lbl,char **externalLbl, char **internalLbl1,char **internalLbl2);
+int symbol_exists(parsing_globals data,char *c, char **label);
 
 void general_operation_parse(parsing_globals data,char* label, char* Command);
 int determine_operation_type(char* str,int *index);
